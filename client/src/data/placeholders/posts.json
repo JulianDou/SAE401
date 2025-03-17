@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "author": "John Doe",
+        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+        "time": "2021-01-01T12:00:00Z",
+        "image": "https://i.pravatar.cc/505"
+    },
+    {
+        "id": 2,
+        "author": "Jane Doe",
+        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+        "time": "2021-01-01T12:00:00Z",
+        "image": null
+    },
+    {
+        "id": 3,
+        "author": "Alex Smith",
+        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+        "time": "2021-01-02T09:30:00Z",
+        "image": null
+    },
+    {
+        "id": 4,
+        "author": "Emily Johnson",
+        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+        "time": "2021-01-02T10:15:00Z",
+        "image": "https://i.pravatar.cc/309"
+    }
+]

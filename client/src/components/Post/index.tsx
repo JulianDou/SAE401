@@ -1,5 +1,6 @@
 import ProfilePic from "../../ui/ProfilePic";
 import Image from "../../ui/Image";
+import Username from "../../ui/Username";
 
 interface PostProps {
     id: number;
@@ -24,7 +25,7 @@ export default function Post(props: PostProps) {
             <ProfilePic profile={props.author} size={3}/>
             <div className="flex flex-col gap-2.5 flex-auto">
                 <div className="flex md:justify-between flex-col md:flex-row">
-                    <h1 className="font-bold">{props.author}</h1>
+                    <Username profile={props.author} />
                     <p className="text-main-slate">{formattedTime}</p>
                 </div>
                 <p className="text-main-slate">{props.text}</p>

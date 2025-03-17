@@ -8,3 +8,8 @@
     --color-main-red: #e94a4a;
     --color-main-charcoal: #3a3d45;
 }
+
+@layer base {
+    .dark {
+    }
+}

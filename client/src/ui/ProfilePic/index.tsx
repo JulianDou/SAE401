@@ -7,8 +7,9 @@ interface ProfilePicProps {
 }
 
 export default function ProfilePic({ size, image='placeholders/defaultpfp.png', profile }: ProfilePicProps) {
+
     return (
-        <Link to={"profile"} style={
+        <Link to={profile == "me" ? '/login' : "/profile?=" + profile} style={
             {
                 width: `${size}rem`,
                 aspectRatio: '1/1',

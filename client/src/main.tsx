@@ -6,6 +6,9 @@ import Layout from './routes/Layout';
 import Error from './routes/Error';
 
 import Feed, {loader as feedLoader} from './routes/Feed';
+import LoginMain from './routes/Login/LoginMain';
+import Login from './routes/Login/Login';
+import Signup from './routes/Login/Signup';
 
 const router = createBrowserRouter([
     {
@@ -24,6 +27,20 @@ const router = createBrowserRouter([
             {
                 path: 'notifications',
                 element: <h1>Notifications</h1>,
+            },
+            {
+                path: 'login',
+                element: <LoginMain />,
+                children: [
+                    {
+                        path: '',
+                        element: <Login />,
+                    },
+                    {
+                        path: 'signup',
+                        element: <Signup />,
+                    }
+                ]
             },
             {
                 path: '*',

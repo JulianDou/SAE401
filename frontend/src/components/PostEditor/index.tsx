@@ -8,7 +8,7 @@ export default function PostEditor() {
     const [characters, setCharacters] = useState(0);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    const currentTime = new Date().toLocaleString('en-US', {
+    let currentTime = new Date().toLocaleString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -25,6 +25,16 @@ export default function PostEditor() {
     }, [open]);
 
     const handleInput = () => {
+        // Update current time on input
+        currentTime = new Date().toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        });
+        
         if (textareaRef.current) {
             textareaRef.current.style.height = 'auto';
             textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;

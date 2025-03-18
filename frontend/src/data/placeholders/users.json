@@ -1,0 +1,34 @@
+[
+    {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john.doe@company.com",
+        "pfp": "https://i.pravatar.cc/505",
+        "location": "New York, NY",
+        "bio": "Lorem ipsum dolor sit amet, consectetur adipiscing elit"
+    },
+    {
+        "id": 2,
+        "name": "Jane Doe",
+        "email": "jane.doe@group.com",
+        "pfp": "https://i.pravatar.cc/309",
+        "location": "Los Angeles, CA",
+        "bio": null
+    },
+    {
+        "id": 3,
+        "name": "Alex Smith",
+        "email": "alex.smith@company2.com",
+        "pfp": "https://i.pravatar.cc/405",
+        "location": null,
+        "bio": "Lorem ipsum dolor sit amet, consectetur adipiscing elit"
+    },
+    {
+        "id": 4,
+        "name": "Emily Johnson",
+        "email": "emily.johnson@group.com",
+        "pfp": "https://i.pravatar.cc/205",
+        "location": "Chicago, IL",
+        "bio": null
+    }
+]

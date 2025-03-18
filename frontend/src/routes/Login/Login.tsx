@@ -1,7 +1,10 @@
 import Input from "../../ui/Input"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 
 export default function Login() {
+    const location = useLocation();
+    const isAdmin = location.pathname.startsWith("/admin");
+
     return (
         <>
             <div className="flex flex-col items-center justify-center w-full h-full gap-10">
@@ -11,9 +14,11 @@ export default function Login() {
                     <Input type="password" input_name="password" subtype="password_login" placeholder="Password" pattern={""}></Input>
                 </form>
                 <button className="flex justify-center p-2.5 rounded-4xl bg-main-black text-white hover:cursor-pointer">Log In</button>
-                <p className="flex flex-col items-center text-main-slate">Don't have an account yet? 
-                    <Link to="./signup" className="underline text-main-charcoal w-fit">Create an account</Link>
-                </p>
+                {!isAdmin &&
+                    <p className="flex flex-col items-center text-main-slate">Don't have an account yet? 
+                        <Link to="./signup" className="underline text-main-charcoal w-fit">Create an account</Link>
+                    </p>
+                }
             </div>
         </>
     )

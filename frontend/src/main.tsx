@@ -9,6 +9,8 @@ import Feed, {loader as feedLoader} from './routes/Feed';
 import LoginMain from './routes/Login/LoginMain';
 import Login from './routes/Login/Login';
 import Signup from './routes/Login/Signup';
+import Admin from './routes/Admin/Admin';
+import Users, {loader as adminUsersLoader} from './routes/Admin/Users';
 
 const router = createBrowserRouter([
     {
@@ -45,6 +47,21 @@ const router = createBrowserRouter([
             {
                 path: '*',
                 element: <Error />,
+            },
+            {
+                path: 'admin',
+                element: <Admin />,
+                children: [
+                    {
+                        path: 'login',
+                        element: <Login />,
+                    },
+                    {
+                        path: 'users',
+                        element: <Users />,
+                        loader: adminUsersLoader
+                    },
+                ]
             }
         ]
     },

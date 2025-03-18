@@ -8,7 +8,7 @@ interface IconProps {
 }
 
 export default function Icon(props: IconProps) {
-    const src = "assets/icons/" + props.icon + "_" + props.active.toString() + ".svg";
+    const src = "/assets/icons/" + props.icon + "_" + props.active.toString() + ".svg";
 
     return (
         <>

@@ -17,7 +17,7 @@ class PostController extends AbstractController
 {
 
     #[Route('/api/posts', methods: ['GET'], format: 'json')]
-    public function index(PostRepository $postRepository, SerializerInterface $serializer, Request $request): JsonResponse
+    public function index(PostRepository $postRepository, Request $request): JsonResponse
     {
         $page = max(1, (int) $request->query->get('page', 1));
         $offset = 50 * ($page - 1);

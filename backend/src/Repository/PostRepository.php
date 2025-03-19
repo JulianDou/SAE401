@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Post;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * @extends ServiceEntityRepository<Post>
@@ -16,9 +17,16 @@ class PostRepository extends ServiceEntityRepository
         parent::__construct($registry, Post::class);
     }
 
-    public function findAll(): array
+    public function findAllLatest($offset, $count): Paginator
     {
-        return $this->findBy([], ['time' => 'DESC']);
+        $query = $this->createQueryBuilder('p')
+            ->orderBy('p.time', 'DESC')
+            ->setFirstResult($offset)
+            ->setMaxResults($count)
+            ->getQuery()
+        ;
+
+        return new Paginator($query);
     }
 
 //    /**

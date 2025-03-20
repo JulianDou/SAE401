@@ -33,8 +33,9 @@ export default function Input(props: InputProps) {
                 <input 
                     onChange={handleChange} 
                     type={props.type} 
-                    placeholder={props.placeholder} 
-                    pattern={props.pattern} 
+                    name={props.input_name}
+                    placeholder={props.placeholder}
+                    {...(props.pattern ? { pattern: props.pattern } : {})}
                     maxLength={props.type === "password" ? 32 : -1}
                     className={`w-full px-2.5 py-2 rounded-xl bg-main-grey text-main-slate ${error ? 'outline-2 outline-main-red' : 'outline-0 outline-transparent'}`}
                 />

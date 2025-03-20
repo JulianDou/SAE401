@@ -27,7 +27,7 @@ export default function Signup() {
         .then((response) => {
             if (!response.ok) {
                 return response.json().then((err) => {
-                    throw new Error(err.message || "An error occurred during signup.");
+                    throw new Error(err.error || "An error occurred...");
                 });
             }
             return response.json();

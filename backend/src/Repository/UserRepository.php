@@ -33,6 +33,25 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
+    public function setToken(User $user, string $token): void
+    {
+        $user->setToken($token);
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
+    }
+
+    public function removeToken(User $user): void
+    {
+        $user->setToken(null);
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
+    }
+
+    public function checkToken(User $user, string $token): bool
+    {
+        return $user->getToken() === $token;
+    }
+
     public function findByUsername(string $username): ?User
     {
         return $this->createQueryBuilder('u')

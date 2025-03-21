@@ -13,42 +13,48 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Cookie;
 
 /* le nom de la classe doit être cohérent avec le nom du fichier */
 class SecurityController extends AbstractController
 {
 
-    #[Route('/login', name: 'login', methods: ['POST'])]
+    #[Route('/api/login', name: 'login', methods: ['POST'])]
     public function login(
-        Request $request, 
-        SerializerInterface $serializer,
+        Request $request,
         UserRepository $user_repository
     ): JsonResponse
     {
         $content = $request->getContent();
         $data = json_decode($content, true);
 
-        if ($data === null){
-            return new JsonResponse(['error' => 'An error occurred.'], 400);
+        if ($data === null) {
+            return new JsonResponse(['message' => "An unexpected error occured."], 400);
         }
 
         $user = $user_repository->findByEmail($data['email']);
-        if (!$user){
-            return new JsonResponse(['error' => 'No user was found with the provided email.'], 400);
+        if (!$user) {
+            return new JsonResponse(['message' => "No user was found with the provided email."], 400);
         }
 
         $checkpwd = $user_repository->checkPassword($user, $data['password']);
-        if (!$checkpwd){
-            return new JsonResponse(['error' => 'Invalid password.'], 400);
+        if (!$checkpwd) {
+            return new JsonResponse(['message' => "Invalid password."], 400);
         }
 
-        return new JsonResponse(['token' => '1234567890'], 200);
+        $token = bin2hex(random_bytes(16));
+        $user_repository->addToken($user, $token);
+        $tokenTime = time();
+
+        $response = new JsonResponse(['token' => $token, 'time' => $tokenTime]);
+
+        return $response;
     }
 
-    #[Route('/signup', name: 'signup', methods: ['POST'])]
+    #[Route('/api/signup', name: 'signup', methods: ['POST'])]
     public function signup(
-        Request $request, 
-        SerializerInterface $serializer, 
+        Request $request,
         UserRepository $user_repository, 
         UserPasswordHasherInterface $passwordHasher
     ): JsonResponse
@@ -56,25 +62,31 @@ class SecurityController extends AbstractController
         $content = $request->getContent();
         $data = json_decode($content, true);
 
-        if ($data === null){
-            return new JsonResponse(['error' => 'An error occurred.'], 400);
+        if ($data === null) {
+            return new JsonResponse(['message' => 'An error occurred.'], 400);
         }
 
         $checkUsername = $user_repository->findByUsername($data['username']);
-        if ($checkUsername !== null){
-            return new JsonResponse(['error' => 'Username already exists.'], 400);
+        if ($checkUsername !== null) {
+            return new JsonResponse(['message' => 'Username already exists.'], 400);
         }
 
         $checkEmail = $user_repository->findByEmail($data['email']);
-        if ($checkEmail !== null){
-            return new JsonResponse(['error' => 'Email already exists.'], 400);
+        if ($checkEmail !== null) {
+            return new JsonResponse(['message' => 'Email already exists.'], 400);
         }
 
         $hashedpwd = $passwordHasher->hashPassword(new User(), $data['password']);
-
         $user_repository->addUser($data['username'], $data['email'], $hashedpwd);
+        $user = $user_repository->findByEmail($data['email']);
 
-        return new JsonResponse(['token' => '1234567890'], 201);
+        $token = bin2hex(random_bytes(16));
+        $user_repository->setToken($user, $token);
+        $tokenTime = time();
+
+        $response = new JsonResponse(['token' => $token, 'time' => $tokenTime]);
+
+        return $response;
     }
 
 }

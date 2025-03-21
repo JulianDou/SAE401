@@ -1,6 +1,7 @@
 import Input from "../../ui/Input";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { api_url } from "../../data/loaders";
 
 export default function Signup() {
     const [error, setError] = useState<string | null>(null);
@@ -17,20 +18,31 @@ export default function Signup() {
             return;
         }
 
-        fetch("https://animated-journey-6996xj7957973rg74-8080.app.github.dev/signup", {
+        fetch(api_url + "signup", {
             method: "POST",
+            credentials: "include",
             headers: {
-                "Content-Type": "application/json",
+            "Content-Type": "application/json",
             },
             body: JSON.stringify(data),
         })
         .then((response) => {
+            const data = response.json();
             if (!response.ok) {
-                return response.json().then((err) => {
-                    throw new Error(err.error || "An error occurred...");
+                return data.then((err) => {
+                    throw new Error(err.message || "An error occurred...");
                 });
             }
-            return response.json();
+            data.then((data) => {
+                if (data.token === undefined) {
+                    throw new Error("An error occurred...");
+                }
+                else {
+                    localStorage.setItem("isAuthenticated", "true");
+                    localStorage.setItem("auth_token", data.token);
+                    return;
+                }
+            });
         })
         .then(() => {
             setError(null);

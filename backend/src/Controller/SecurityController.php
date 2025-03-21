@@ -33,7 +33,7 @@ class SecurityController extends AbstractController
             return new JsonResponse(['message' => "An unexpected error occured."], 400);
         }
 
-        $user = $user_repository->findByEmail($data['email']);
+        $user = $user_repository->findOneBy(['email' => $data['email']]);
         if (!$user) {
             return new JsonResponse(['message' => "No user was found with the provided email."], 400);
         }
@@ -44,10 +44,10 @@ class SecurityController extends AbstractController
         }
 
         $token = bin2hex(random_bytes(16));
-        $user_repository->addToken($user, $token);
+        $user_repository->setToken($user, $token);
         $tokenTime = time();
 
-        $response = new JsonResponse(['token' => $token, 'time' => $tokenTime]);
+        $response = new JsonResponse(['token' => $token, 'time' => $tokenTime, 'userid' => $user->getId()]);
 
         return $response;
     }
@@ -66,12 +66,12 @@ class SecurityController extends AbstractController
             return new JsonResponse(['message' => 'An error occurred.'], 400);
         }
 
-        $checkUsername = $user_repository->findByUsername($data['username']);
+        $checkUsername = $user_repository->findOneBy(['username' => $data['username']]);
         if ($checkUsername !== null) {
             return new JsonResponse(['message' => 'Username already exists.'], 400);
         }
 
-        $checkEmail = $user_repository->findByEmail($data['email']);
+        $checkEmail = $user_repository->findOneBy(['email' => $data['email']]);
         if ($checkEmail !== null) {
             return new JsonResponse(['message' => 'Email already exists.'], 400);
         }
@@ -84,7 +84,7 @@ class SecurityController extends AbstractController
         $user_repository->setToken($user, $token);
         $tokenTime = time();
 
-        $response = new JsonResponse(['token' => $token, 'time' => $tokenTime]);
+        $response = new JsonResponse(['token' => $token, 'time' => $tokenTime, 'userid' => $user->getId()]);
 
         return $response;
     }

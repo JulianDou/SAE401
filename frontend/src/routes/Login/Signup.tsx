@@ -40,6 +40,7 @@ export default function Signup() {
                 else {
                     localStorage.setItem("isAuthenticated", "true");
                     localStorage.setItem("auth_token", data.token);
+                    localStorage.setItem("user_id", data.userid);
                     return;
                 }
             });

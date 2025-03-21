@@ -1,8 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 
 import ProfilePic from '../../ui/ProfilePic';
+import Username from '../../ui/Username';
 
-export default function PostEditor() {
+interface PostEditorProps {
+    id: number;
+    username: string;
+}
+
+export default function PostEditor(props: PostEditorProps) {
     const [open, setOpen] = useState(false);
     const [cancelling, setCancelling] = useState(false);
     const [characters, setCharacters] = useState(0);
@@ -65,10 +71,10 @@ export default function PostEditor() {
         ">
             <div className={`${open ? 'visible flex flex-col items-center gap-8 mt-2 mb-64 w-full md:min-w-96 md:my-8' : 'hidden'}`}>
                 <div className="flex gap-3 w-full">
-                    <ProfilePic profile={"default"} size={3}/>
+                    <ProfilePic username={props.username} id={props.id} size={3}/>
                     <div className="flex flex-col gap-2.5 flex-auto">
                         <div className="flex md:justify-between flex-col md:flex-row">
-                            <h1 className="font-bold">Me</h1>
+                            <Username username={props.username} id={props.id} />
                             <p className="text-main-slate">{currentTime}</p>
                         </div>
                         <textarea 

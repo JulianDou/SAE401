@@ -17,7 +17,7 @@ export default function Login() {
         const formData = new FormData(event.currentTarget);
         const data = Object.fromEntries(formData.entries()); // Convertit en objet
         if (data.email === "" || data.password === "") {
-            alert("Please fill in all the fields in order to log in to your account.");
+            setError("Please fill in all the fields in order to log in to your account.");
             return;
         }
     
@@ -43,6 +43,7 @@ export default function Login() {
                 else {
                     localStorage.setItem("isAuthenticated", "true");
                     localStorage.setItem("auth_token", data.token);
+                    localStorage.setItem("user_id", data.userid);
                     return;
                 }
             });

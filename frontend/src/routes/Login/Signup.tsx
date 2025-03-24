@@ -18,7 +18,7 @@ export default function Signup() {
             return;
         }
 
-        fetch(api_url + "signup", {
+        fetch(api_url + "register", {
             method: "POST",
             credentials: "include",
             headers: {
@@ -33,17 +33,7 @@ export default function Signup() {
                     throw new Error(err.message || "An error occurred...");
                 });
             }
-            data.then((data) => {
-                if (data.token === undefined) {
-                    throw new Error("An error occurred...");
-                }
-                else {
-                    localStorage.setItem("isAuthenticated", "true");
-                    localStorage.setItem("auth_token", data.token);
-                    localStorage.setItem("user_id", data.userid);
-                    return;
-                }
-            });
+            navigate("/login");
         })
         .then(() => {
             setError(null);

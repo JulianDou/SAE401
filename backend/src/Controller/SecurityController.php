@@ -42,6 +42,10 @@ class SecurityController extends AbstractController
         if (!$checkpwd) {
             return new JsonResponse(['message' => "Invalid password."], 400);
         }
+        
+        if ($user->isVerified() === false) {
+            return new JsonResponse(['message' => "You are not yet verified. Check your emails ?"], 400);
+        }
 
         $token = bin2hex(random_bytes(16));
         $user_repository->setToken($user, $token);
@@ -52,42 +56,43 @@ class SecurityController extends AbstractController
         return $response;
     }
 
-    #[Route('/api/signup', name: 'signup', methods: ['POST'])]
-    public function signup(
-        Request $request,
-        UserRepository $user_repository, 
-        UserPasswordHasherInterface $passwordHasher
-    ): JsonResponse
-    {
-        $content = $request->getContent();
-        $data = json_decode($content, true);
+    // ---== Old signup, moved to RegistrationController.php ==---
+    // #[Route('/api/signup', name: 'signup', methods: ['POST'])]
+    // public function signup(
+    //     Request $request,
+    //     UserRepository $user_repository, 
+    //     UserPasswordHasherInterface $passwordHasher
+    // ): JsonResponse
+    // {
+    //     $content = $request->getContent();
+    //     $data = json_decode($content, true);
 
-        if ($data === null) {
-            return new JsonResponse(['message' => 'An error occurred.'], 400);
-        }
+    //     if ($data === null) {
+    //         return new JsonResponse(['message' => 'An error occurred.'], 400);
+    //     }
 
-        $checkUsername = $user_repository->findOneBy(['username' => $data['username']]);
-        if ($checkUsername !== null) {
-            return new JsonResponse(['message' => 'Username already exists.'], 400);
-        }
+    //     $checkUsername = $user_repository->findOneBy(['username' => $data['username']]);
+    //     if ($checkUsername !== null) {
+    //         return new JsonResponse(['message' => 'Username already exists.'], 400);
+    //     }
 
-        $checkEmail = $user_repository->findOneBy(['email' => $data['email']]);
-        if ($checkEmail !== null) {
-            return new JsonResponse(['message' => 'Email already exists.'], 400);
-        }
+    //     $checkEmail = $user_repository->findOneBy(['email' => $data['email']]);
+    //     if ($checkEmail !== null) {
+    //         return new JsonResponse(['message' => 'Email already exists.'], 400);
+    //     }
 
-        $hashedpwd = $passwordHasher->hashPassword(new User(), $data['password']);
-        $user_repository->addUser($data['username'], $data['email'], $hashedpwd);
-        $user = $user_repository->findByEmail($data['email']);
+    //     $hashedpwd = $passwordHasher->hashPassword(new User(), $data['password']);
+    //     $user_repository->addUser($data['username'], $data['email'], $hashedpwd);
+    //     $user = $user_repository->findByEmail($data['email']);
 
-        $token = bin2hex(random_bytes(16));
-        $user_repository->setToken($user, $token);
-        $tokenTime = time();
+    //     $token = bin2hex(random_bytes(16));
+    //     $user_repository->setToken($user, $token);
+    //     $tokenTime = time();
 
-        $response = new JsonResponse(['token' => $token, 'time' => $tokenTime, 'userid' => $user->getId()]);
+    //     $response = new JsonResponse(['token' => $token, 'time' => $tokenTime, 'userid' => $user->getId()]);
 
-        return $response;
-    }
+    //     return $response;
+    // }
 
 }
 

@@ -13,6 +13,9 @@ use App\Repository\PostRepository;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Post;
+use Doctrine\ORM\EntityManager;
 
 /* le nom de la classe doit être cohérent avec le nom du fichier */
 class PostController extends AbstractController
@@ -35,6 +38,38 @@ class PostController extends AbstractController
         ]);
 
         return JsonResponse::fromJsonString($posts);
+    }
+
+    #[Route('/api/posts', methods: ['POST'], format: 'json')]
+    public function post(
+        PostRepository $postRepository,
+        UserRepository $userRepository,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): JsonResponse
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing. Try logging in ?'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Authorization token invalid. Try logging in ?'], 401);
+        }
+
+        $content = $request->getContent();
+        $data = json_decode($content, true);
+
+        $post = new Post();
+        $post->setAuthor($user);
+        $post->setText($data['text']);
+        $post->setTime(new \DateTime());
+
+        $entityManager->persist($post);
+        $entityManager->flush();
+
+        return new JsonResponse(['message' => 'Your post has been created.'], 201);
     }
 
     #[Route('/api/posts/{id}', methods: ['GET'], format: 'json')]

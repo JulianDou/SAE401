@@ -37,5 +37,35 @@ class UserController extends AbstractController
         return $this->json($user_safe);
     }
 
+    #[Route('/api/users', methods: ['GET'], format: 'json')]
+    public function getAllUsers(Request $request, UserRepository $userRepository): JsonResponse
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return $this->json(['error' => 'Authorization token missing'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return $this->json(['error' => 'Invalid token'], 401);
+        }
+        if ($user && !$user->getIsAdmin()) {
+            return $this->json(['error' => 'Access denied. You must be an administrator to access this page'], 403);
+        }
+        
+        $users = $userRepository->findAll();
+        $users_safe = [];
+        foreach ($users as $user) {
+            $users_safe[] = [
+                'id' => $user->getId(),
+                'username' => $user->getUsername(),
+                'email' => $user->getEmail(),
+                'verified' => $user->isVerified(),
+                'admin' => $user->getIsAdmin(),
+            ];
+        }
+        return $this->json($users_safe);
+    }
+
 }
 

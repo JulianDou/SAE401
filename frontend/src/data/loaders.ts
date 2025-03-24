@@ -41,4 +41,21 @@ export async function fetchUsers(){
     return res.json();
 }
 
+export async function fetchAdmin(){
+    const token = localStorage.getItem("auth_token");
+
+    const res = await fetch(api_url + "admin", {
+        headers: {
+            "Authorization": `${token}`
+        }
+    });
+
+    if (res.status === 401) {
+        window.location.href = "/login";
+        return {};
+    }
+
+    return res.json();
+}    
+
 export { api_url };

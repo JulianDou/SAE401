@@ -9,8 +9,9 @@ import Feed, {loader as feedLoader} from './routes/Feed';
 import LoginMain from './routes/Login/LoginMain';
 import Login from './routes/Login/Login';
 import Signup from './routes/Login/Signup';
-import Admin from './routes/Admin/Admin';
+import Admin, {loader as adminLoader} from './routes/Admin/Admin';
 import Users, {loader as adminUsersLoader} from './routes/Admin/Users';
+
 
 const router = createBrowserRouter([
     {
@@ -51,6 +52,7 @@ const router = createBrowserRouter([
             {
                 path: 'admin',
                 element: <Admin />,
+                loader: adminLoader,
                 children: [
                     {
                         path: 'login',
@@ -60,7 +62,7 @@ const router = createBrowserRouter([
                         path: 'users',
                         element: <Users />,
                         loader: adminUsersLoader
-                    },
+                    }
                 ]
             }
         ]

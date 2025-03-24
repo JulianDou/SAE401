@@ -40,11 +40,11 @@ class SecurityController extends AbstractController
 
         $checkpwd = $user_repository->checkPassword($user, $data['password']);
         if (!$checkpwd) {
-            return new JsonResponse(['message' => "Invalid password."], 400);
+            return new JsonResponse(['message' => "Invalid password."], 403);
         }
         
         if ($user->isVerified() === false) {
-            return new JsonResponse(['message' => "You are not yet verified. Check your emails ?"], 400);
+            return new JsonResponse(['message' => "You are not yet verified. Check your emails ?"], 403);
         }
 
         $token = bin2hex(random_bytes(16));

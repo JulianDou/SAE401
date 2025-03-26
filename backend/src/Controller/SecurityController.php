@@ -56,6 +56,27 @@ class SecurityController extends AbstractController
         return $response;
     }
 
+    #[Route('/api/logout', name: 'logout', methods: ['POST'])]
+    public function logout(
+        Request $request,
+        UserRepository $userRepository
+    ): JsonResponse
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing. You are not currently logged in.'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Authorization token invalid. Try logging in ?'], 401);
+        }
+
+        $userRepository->removeToken($user);
+
+        return new JsonResponse(['message' => 'You have been logged out.']);
+    }
+
     // ---== Old signup, moved to RegistrationController.php ==---
     // #[Route('/api/signup', name: 'signup', methods: ['POST'])]
     // public function signup(

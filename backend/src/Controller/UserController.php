@@ -5,12 +5,14 @@ namespace App\Controller;
 
 /* indique l'utilisation du bon bundle pour gérer nos routes */
 
+use App\Repository\PostRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 /* le nom de la classe doit être cohérent avec le nom du fichier */
 class UserController extends AbstractController
@@ -73,7 +75,7 @@ class UserController extends AbstractController
         int $id, 
         Request $request, 
         UserRepository $userRepository,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
     ): JsonResponse {
         $token = $request->headers->get('Authorization');
         if (!$token) {
@@ -143,6 +145,71 @@ class UserController extends AbstractController
                 'admin' => $userToUpdate->getIsAdmin(),
             ]
         ], 200);
+    }
+
+    #[Route('/api/profile/{username}/posts', methods: ['GET'], format: 'json')]
+    public function getProfilePosts(
+        string $username,
+        Request $request,
+        UserRepository $userRepository,
+        PostRepository $postRepository,
+        SerializerInterface $serializer
+    ): JsonResponse 
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return $this->json(['error' => 'Authorization token missing'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return $this->json(['error' => 'Invalid token'], 401);
+        }
+
+        $targetUser = $userRepository->findOneBy(['username' => $username]);
+
+        if (!$targetUser) {
+            return $this->json(['error' => 'User not found'], 404);
+        }
+
+
+        $posts = $postRepository->findBy(['author' => $targetUser->getId()]);
+
+        $response = $serializer->serialize($posts, 'json', ['groups' => ['post:read']]);
+
+        return new JsonResponse($response, 200, [], true);
+    }
+
+    #[Route('/api/profile/{username}', methods: ['GET'], format: 'json')]
+    public function getProfile(
+        string $username,
+        Request $request,
+        UserRepository $userRepository,
+    ): JsonResponse 
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return $this->json(['error' => 'Authorization token missing'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return $this->json(['error' => 'Invalid token'], 401);
+        }
+
+        $targetUser = $userRepository->findOneBy(['username' => $username]);
+
+        if (!$targetUser) {
+            return $this->json(['error' => 'User not found'], 404);
+        }
+
+        $user = $userRepository->findOneBy(['username' => $username]);
+        $user_safe = [
+            'id' => $user->getId(),
+            'username' => $user->getUsername(),
+            'email' => $user->getEmail(),
+        ];
+        return $this->json($user_safe);
     }
 
 }

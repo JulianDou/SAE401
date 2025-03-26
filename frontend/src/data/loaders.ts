@@ -34,6 +34,36 @@ export async function getUserData(id: number){
     return res.json();
 }
 
+export async function getUserProfile(username: string){
+    const res = await fetch(api_url + "profile/" + username, {
+        headers: {
+            "Authorization": `${token}`
+        }
+    });
+
+    if (res.status === 401) {
+        window.location.href = "/login";
+        return [];
+    }
+
+    return res.json();
+}
+
+export async function getUserProfilePosts(username: string){
+    const res = await fetch(api_url + "profile/" + username + "/posts", {
+        headers: {
+            "Authorization": `${token}`
+        }
+    });
+
+    if (res.status === 401) {
+        window.location.href = "/login";
+        return [];
+    }
+
+    return res.json();
+}
+
 export async function fetchUsers(){
     const res = await fetch(api_url + "users", {
         headers: {

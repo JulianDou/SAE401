@@ -7,7 +7,7 @@ interface ProfilePicProps {
     username: string;
 }
 
-export default function ProfilePic({ size, image='placeholders/defaultpfp.png', id, username }: ProfilePicProps) {
+export default function ProfilePic({ size, image='/placeholders/defaultpfp.png', id, username }: ProfilePicProps) {
 
     return (
         <Link to={"/user/" + username} data-userid={id} style={

@@ -43,8 +43,12 @@ class SecurityController extends AbstractController
             return new JsonResponse(['message' => "Invalid password."], 403);
         }
         
-        if ($user->isVerified() === false) {
+        if (!$user->isVerified()) {
             return new JsonResponse(['message' => "You are not yet verified. Check your emails ?"], 403);
+        }
+
+        if ($user->isBanned()) {
+            return new JsonResponse(['message' => "Your account has been deactivated. You can no longer log in."], 403);
         }
 
         $token = bin2hex(random_bytes(16));

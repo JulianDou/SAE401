@@ -1,28 +1,28 @@
 [
     {
         "id": 1,
-        "author": "John Doe",
+        "authorid": 1,
         "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
         "time": "2021-01-01T12:00:00Z",
         "image": "https://i.pravatar.cc/505"
     },
     {
         "id": 2,
-        "author": "Jane Doe",
+        "authorid": 1,
         "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
         "time": "2021-01-01T12:00:00Z",
         "image": null
     },
     {
         "id": 3,
-        "author": "Alex Smith",
+        "authorid": 1,
         "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
         "time": "2021-01-02T09:30:00Z",
         "image": null
     },
     {
         "id": 4,
-        "author": "Emily Johnson",
+        "authorid": 1,
         "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
         "time": "2021-01-02T10:15:00Z",
         "image": "https://i.pravatar.cc/309"

@@ -1,9 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
+import { api_url } from '../../data/loaders';
 
 import ProfilePic from '../../ui/ProfilePic';
+import Username from '../../ui/Username';
 
-export default function PostEditor() {
+interface PostEditorProps {
+    id: number;
+    username: string;
+}
+
+export default function PostEditor(props: PostEditorProps) {
     const [open, setOpen] = useState(false);
+    const [message, setMessage] = useState('');
+    const [popupOpen, setPopupOpen] = useState(false);
     const [cancelling, setCancelling] = useState(false);
     const [characters, setCharacters] = useState(0);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -58,6 +67,51 @@ export default function PostEditor() {
         }
     }
 
+    function handleSubmit() {
+        const token = localStorage.getItem("auth_token");
+
+        const text = getInput();
+        console.log(text);
+        const data = {
+            text: text,
+        }
+
+        fetch (api_url + "posts", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `${token}`
+            },
+            body: JSON.stringify(data),
+        })
+        .then((response) => {
+            const res = response.json();
+            if (!response.ok) {
+                return res.then((err) => {
+                    throw new Error(err.message || "An error occurred...");
+                });
+            }
+            res.then((data) => {
+                if (data.message === undefined) {
+                    setPopupOpen(true);
+                    setMessage("An unexpected error occurred...");
+                    return;
+                }
+                else {
+                    setPopupOpen(true);
+                    setMessage(data.message);
+                    return;
+                }
+            })
+        })
+        .catch((error) => {
+            setPopupOpen(true);
+            setMessage(error.message);
+        });
+    }
+
+
     return (
         <div className="
             flex py-5 px-2.5 md:px-[25%] justify-center items-center gap-2.5 self-stretch relative
@@ -65,10 +119,10 @@ export default function PostEditor() {
         ">
             <div className={`${open ? 'visible flex flex-col items-center gap-8 mt-2 mb-64 w-full md:min-w-96 md:my-8' : 'hidden'}`}>
                 <div className="flex gap-3 w-full">
-                    <ProfilePic profile={"default"} size={3}/>
+                    <ProfilePic username={props.username} id={props.id} size={3}/>
                     <div className="flex flex-col gap-2.5 flex-auto">
                         <div className="flex md:justify-between flex-col md:flex-row">
-                            <h1 className="font-bold">Me</h1>
+                            <Username username={props.username} id={props.id} />
                             <p className="text-main-slate">{currentTime}</p>
                         </div>
                         <textarea 
@@ -91,15 +145,23 @@ export default function PostEditor() {
                 </div>
                 <div className={`${characters > 0 ? 'visible' : 'hidden'} flex w-full gap-4 justify-center md:justify-between`}>
                     <button onClick={() => setCancelling(true)} className="flex justify-center w-24 p-2.5 rounded-4xl border-main-red border-2 text-main-red hover:cursor-pointer">Cancel</button>
-                    <button onClick={() => console.log(getInput())} className="flex justify-center w-36 p-2.5 rounded-4xl bg-main-black text-white hover:cursor-pointer">Post</button>
+                    <button onClick={handleSubmit} className="flex justify-center w-36 p-2.5 rounded-4xl bg-main-black text-white hover:cursor-pointer">Post</button>
                 </div>
             </div>
             <div className={`${cancelling ? 'visible' : 'hidden'} absolute w-full h-full flex justify-center items-center backdrop-blur-xs`}>
-                <div className="flex flex-col p-8 gap-4 bg-white rounded">
+                <div className="flex flex-col p-8 gap-4 bg-white rounded shadow-lg">
                     <p>Are you sure you want to cancel writing ?</p>
                     <div className="flex w-full h-fit gap-4 justify-center">
                         <button onClick={() => setCancelling(false)} className="flex h-fit justify-center p-2.5 rounded-4xl border-main-red border-2 text-main-red hover:cursor-pointer">No, keep my post</button>
                         <button onClick={() => resetInput()} className="flex h-fit justify-center p-2.5 rounded-4xl bg-main-red text-white hover:cursor-pointer">Yes, cancel</button>
+                    </div>
+                </div>
+            </div>
+            <div className={`${popupOpen ? 'visible' : 'hidden'} absolute w-full h-full flex justify-center items-center backdrop-blur-xs`}>
+                <div className="flex flex-col p-8 gap-4 bg-white rounded shadow-lg">
+                    <p>{message}</p>
+                    <div className="flex w-full h-fit gap-4 justify-center">
+                        <button onClick={() => {setPopupOpen(false); resetInput()}} className="flex h-fit justify-center p-2.5 rounded-4xl bg-main-black text-white hover:cursor-pointer">Got it</button>
                     </div>
                 </div>
             </div>

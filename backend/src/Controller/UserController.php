@@ -40,6 +40,7 @@ class UserController extends AbstractController
         return $this->json($user_safe);
     }
 
+    // route for admins
     #[Route('/api/users', methods: ['GET'], format: 'json')]
     public function getAllUsers(Request $request, UserRepository $userRepository): JsonResponse
     {
@@ -65,6 +66,7 @@ class UserController extends AbstractController
                 'email' => $user->getEmail(),
                 'verified' => $user->isVerified(),
                 'admin' => $user->getIsAdmin(),
+                'banned' => $user->isBanned(),
             ];
         }
         return $this->json($users_safe);
@@ -127,6 +129,14 @@ class UserController extends AbstractController
                     break;
                 case 'email':
                     $userToUpdate->setEmail($modification['value']);
+                    break;
+                case 'banned':
+                    if ($modification['value'] === 'true'){
+                        $userToUpdate->setBanned(true);
+                    }
+                    else {
+                        $userToUpdate->setBanned(false);
+                    }
                     break;
                 default:
                     return new JsonResponse(['message' => 'Invalid field: ' . $modification['modified']], 400);

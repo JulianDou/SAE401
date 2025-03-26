@@ -8,6 +8,7 @@ interface UserProps {
     email: string;
     verified: boolean;
     admin: boolean;
+    banned: boolean;
 }
 
 interface Modification {
@@ -20,13 +21,15 @@ export default function User(props: UserProps) {
         username: props.username,
         email: props.email,
         verified: props.verified,
-        admin: props.admin
+        admin: props.admin,
+        banned: props.banned
     });
     const [saveButton, setSaveButton] = useState(false);
     const [username, setUsername] = useState(initialValues.username);
     const [email, setEmail] = useState(initialValues.email);
     const [verified, setVerified] = useState(initialValues.verified);
     const [admin, setAdmin] = useState(initialValues.admin);
+    const [banned, setBanned] = useState(initialValues.banned);
     const [modifications, setModifications] = useState<Modification[]>([]);
     const [error, setError] = useState('');
     const [messageColor, setMessageColor] = useState('');
@@ -65,7 +68,8 @@ export default function User(props: UserProps) {
                         username: data.user.username,
                         email: data.user.email,
                         verified: data.user.verified,
-                        admin: data.user.admin
+                        admin: data.user.admin,
+                        banned: data.user.banned
                     });
                     console.log(initialValues);
                     setSaveButton(false);
@@ -107,6 +111,10 @@ export default function User(props: UserProps) {
                 propEquivalent = initialValues.admin;
                 setAdmin(value as boolean);
                 break;
+            case 'banned':
+                propEquivalent = initialValues.banned;
+                setBanned(value as boolean);
+                break;
         }
 
         if (value !== propEquivalent) {
@@ -135,10 +143,10 @@ export default function User(props: UserProps) {
             relative flex flex-col items-center justify-center w-full p-2.5 gap-2.5 border-[1px] border-main-grey rounded-md
             ${saveButton ? 'mb-10 md:mb-0' : 'mb-0'}
         `}>
-            <div className="w-full flex md:items-center gap-2.5">
+            <div className="w-full flex flex-col md:flex-row md:items-center gap-2.5">
                 <ProfilePic id={props.id} username={initialValues.username} size={4} />
                 <div className="w-full flex flex-col md:flex-row p-2.5 gap-2.5 after:content-[''] after:w-full after:md:w-[1px] after:h-[1px] after:md:h-full after:bg-main-grey after:order-1">
-                    <div className="flex flex-col gap-2.5 order-0">
+                    <div className="flex flex-col gap-2.5 order-0 items">
                         <input
                             type="text"
                             name="username"
@@ -173,9 +181,22 @@ export default function User(props: UserProps) {
                     </div>
                 </div>
             </div>
+            <div className="w-full order-5">
+                <input type="checkbox" id={"banned-btn-" + props.id} name="banned" onChange={handleChange} className="hidden" />
+                <label 
+                    htmlFor={"banned-btn-" + props.id}
+                    className={`flex p-2 justify-self-end rounded-lg hover:cursor-pointer items-center justify-center h-min font-bold ${banned ? 'bg-main-black text-main-white' : 'border-2 border-main-red text-main-red'}`}
+                >
+                    {banned ? 'Unban' : 'Ban'}
+                </label>
+            </div>
+
+            {/* Error message */}
             <p className={ messageColor === 'red' ? 'text-red-500' : 'text-black' }>
                 {error}
             </p>
+
+            {/* Save button, displayed below the box */}
             <div
                 className={`
                     ${saveButton ? '' : 'hidden'}

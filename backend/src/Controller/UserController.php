@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
 
 /* le nom de la classe doit être cohérent avec le nom du fichier */
 class UserController extends AbstractController
@@ -65,6 +66,83 @@ class UserController extends AbstractController
             ];
         }
         return $this->json($users_safe);
+    }
+
+    #[Route('/api/users/edit/{id}', methods: ['PATCH'], format: 'json')]
+    public function updateUser(
+        int $id, 
+        Request $request, 
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Invalid token'], 401);
+        }
+
+        if ($user && !($user->getIsAdmin() || $user->getId() === $id)) {
+            return new JsonResponse(['message' => 'Access denied. You must be an administrator or own this account to proceed'], 403);
+        }
+
+        $content = $request->getContent();
+        $data = json_decode($content, true);
+
+        $userToUpdate = $userRepository->find($id);
+        if (!$userToUpdate) {
+            return new JsonResponse(['message' => 'User not found'], 404);
+        }
+
+        // Parcourir les modifications
+        foreach ($data as $modification) {
+            if (!isset($modification['modified'], $modification['value'])) {
+                return new JsonResponse(['message' => 'Invalid data format'], 400);
+            }
+
+            switch ($modification['modified']) {
+                case 'verified':
+                    if ($modification['value'] === 'true'){
+                        $userToUpdate->setIsVerified(true);
+                    }
+                    else {
+                        $userToUpdate->setIsVerified(false);
+                    }
+                    break;
+                case 'admin':
+                    if ($modification['value'] === 'true'){
+                        $userToUpdate->setRoles(['ROLE_ADMIN']);
+                    }
+                    else {
+                        $userToUpdate->setRoles([]);
+                    }
+                    break;
+                case 'username':
+                    $userToUpdate->setUsername($modification['value']);
+                    break;
+                case 'email':
+                    $userToUpdate->setEmail($modification['value']);
+                    break;
+                default:
+                    return new JsonResponse(['message' => 'Invalid field: ' . $modification['modified']], 400);
+            }
+        }
+
+        $entityManager->persist($userToUpdate);
+        $entityManager->flush();
+
+        return new JsonResponse([
+            'message' => 'User updated',
+            'user' => [
+                'username' => $userToUpdate->getUsername(),
+                'email' => $userToUpdate->getEmail(),
+                'verified' => $userToUpdate->isVerified(),
+                'admin' => $userToUpdate->getIsAdmin(),
+            ]
+        ], 200);
     }
 
 }

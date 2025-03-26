@@ -172,11 +172,14 @@ class UserController extends AbstractController
             return $this->json(['error' => 'User not found'], 404);
         }
 
-
-        $posts = $postRepository->findBy(['author' => $targetUser->getId()]);
+        if (!$targetUser->isBanned()){
+            $posts = $postRepository->findBy(['author' => $targetUser->getId()]);    
+        }
+        else {
+            $posts = [];
+        }
 
         $response = $serializer->serialize($posts, 'json', ['groups' => ['post:read']]);
-
         return new JsonResponse($response, 200, [], true);
     }
 
@@ -204,11 +207,22 @@ class UserController extends AbstractController
         }
 
         $user = $userRepository->findOneBy(['username' => $username]);
-        $user_safe = [
-            'id' => $user->getId(),
-            'username' => $user->getUsername(),
-            'email' => $user->getEmail(),
-        ];
+         
+        if (!$user->isBanned()){
+            $user_safe = [
+                'id' => $user->getId(),
+                'username' => $user->getUsername(),
+                'email' => $user->getEmail(),
+            ];
+        }
+        else {
+            $user_safe = [
+                'id' => $user->getId(),
+                'username' => $user->getUsername(),
+                'email' => 'This user has been banned.',
+            ];
+        }
+        
         return $this->json($user_safe);
     }
 

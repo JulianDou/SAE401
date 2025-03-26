@@ -29,6 +29,12 @@ class PostController extends AbstractController
 
         $paginator = $postRepository->findAllLatest($offset, 50);
 
+        foreach ($paginator as $post) {
+            if ($post->getAuthor()->isBanned()){
+                $post->setText('This user has been banned. As such, their posts are no longer visible.');
+            }
+        }
+        
         $previousPage = $page > 1 ? $page - 1 : null;
         $nextPage = count($paginator) === 50 ? $page + 1 : null;
 

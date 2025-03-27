@@ -44,6 +44,7 @@ export default function Login() {
                     localStorage.setItem("isAuthenticated", "true");
                     localStorage.setItem("auth_token", data.token);
                     localStorage.setItem("user_id", data.userid);
+                    localStorage.setItem("username", data.username);
                     return;
                 }
             });

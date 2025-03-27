@@ -55,7 +55,7 @@ class SecurityController extends AbstractController
         $user_repository->setToken($user, $token);
         $tokenTime = time();
 
-        $response = new JsonResponse(['token' => $token, 'time' => $tokenTime, 'userid' => $user->getId()]);
+        $response = new JsonResponse(['token' => $token, 'time' => $tokenTime, 'userid' => $user->getId(), 'username' => $user->getUsername()]);
 
         return $response;
     }

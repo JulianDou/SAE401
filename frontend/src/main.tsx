@@ -5,7 +5,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from './routes/Layout';
 import Error from './routes/Error';
 
-import Feed, {loader as feedLoader} from './routes/Feed';
+import Feed, {loader as feedLoader, forYouLoader as feedLoaderFollowed} from './routes/Feed';
 import LoginMain from './routes/Login/LoginMain';
 import Login from './routes/Login/Login';
 import Signup from './routes/Login/Signup';
@@ -28,6 +28,11 @@ const router = createBrowserRouter([
                 path: 'user/:username',
                 element: <User />,
                 loader: userLoader,
+            },
+            {
+                path: 'foryou',
+                element: <Feed />,
+                loader: feedLoaderFollowed,
             },
             {
                 path: 'login',

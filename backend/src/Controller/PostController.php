@@ -83,7 +83,7 @@ class PostController extends AbstractController
         PostRepository $postRepository,
         UserRepository $userRepository,
         Request $request,
-        EntityManagerInterface $entityManager
+        SerializerInterface $serializer
     ): JsonResponse
     {
         $token = $request->headers->get('Authorization');
@@ -96,14 +96,18 @@ class PostController extends AbstractController
             return new JsonResponse(['message' => 'Authorization token invalid. Try logging in ?'], 401);
         }
 
-        $followedUsers = $user->getFollowing();
+        $followedUsers = $user->getFollows();
         $followedPosts = [];
-        for ($i = 0; $i < count($followedUsers); $i++) {
-            $posts = $postRepository->findBy(['author' => $followedUsers[$i]]);
+        foreach ($followedUsers as $followedUser) {
+            $posts = $postRepository->findBy(['author' => $followedUser]);
             $followedPosts = array_merge($followedPosts, $posts);
         }
 
-        return new JsonResponse($followedPosts);
+        $serializedPosts = $serializer->serialize($followedPosts, 'json', [
+            AbstractNormalizer::GROUPS => ['post:read'],
+        ]);
+
+        return JsonResponse::fromJsonString($serializedPosts);
     }
 
     #[Route('/api/posts/{id}', methods: ['GET'], format: 'json')]

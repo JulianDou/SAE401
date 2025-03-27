@@ -1,9 +1,10 @@
-import { fetchPosts, getUserData } from "../data/loaders"
-import { useLoaderData } from "react-router-dom"
+import { fetchPosts, getUserData, fetchFollowedPosts } from "../data/loaders"
+import { useLoaderData, useLocation } from "react-router-dom"
 import { useState } from "react"
 
 import Post from "../components/Post"
 import PostEditor from "../components/PostEditor"
+import { useEffect } from "react";
 
 export async function loader() {
     const data = {
@@ -16,16 +17,42 @@ export async function loader() {
     return data;
 }
 
+export async function forYouLoader() {
+    const data = {
+        posts: [],
+        profile: {}
+    }
+    data.posts = await fetchFollowedPosts()
+    const userId = localStorage.getItem("user_id");
+    data.profile = await getUserData(userId ? parseInt(userId, 10) : 0);
+    return data;
+}
+
 export default function Feed() {
+    const location = useLocation();
     const initialData = useLoaderData()
     const [data, setData] = useState(initialData)
 
+    useEffect(() => {
+        refresh();
+    }, [location]);
+
     async function refresh() {
-        const newData = {
-            posts: await fetchPosts(),
-            profile: initialData.profile
+        const path = location.pathname;
+        if (path === "/foryou") {
+            const newData = {
+                posts: await fetchFollowedPosts(),
+                profile: initialData.profile
+            }
+            setData(newData);
         }
-        setData(newData);
+        else {
+            const newData = {
+                posts: await fetchPosts(),
+                profile: initialData.profile
+            }
+            setData(newData);
+        }
     }
 
     return (

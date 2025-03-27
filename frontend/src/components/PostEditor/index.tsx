@@ -71,7 +71,6 @@ export default function PostEditor(props: PostEditorProps) {
         const token = localStorage.getItem("auth_token");
 
         const text = getInput();
-        console.log(text);
         const data = {
             text: text,
         }

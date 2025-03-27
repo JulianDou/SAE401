@@ -57,9 +57,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?bool $banned = null;
 
+    /**
+     * @var Collection<int, self>
+     */
+    #[ORM\ManyToMany(targetEntity: self::class, inversedBy: 'followers')]
+    private Collection $follows;
+
+    /**
+     * @var Collection<int, self>
+     */
+    #[ORM\ManyToMany(targetEntity: self::class, mappedBy: 'follows')]
+    private Collection $followers;
+
     public function __construct()
     {
         $this->posts = new ArrayCollection();
+        $this->follows = new ArrayCollection();
+        $this->followers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -216,6 +230,57 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setBanned(bool $banned): static
     {
         $this->banned = $banned;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, self>
+     */
+    public function getFollows(): Collection
+    {
+        return $this->follows;
+    }
+
+    public function addFollow(self $follow): static
+    {
+        if (!$this->follows->contains($follow)) {
+            $this->follows->add($follow);
+        }
+
+        return $this;
+    }
+
+    public function removeFollow(self $follow): static
+    {
+        $this->follows->removeElement($follow);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, self>
+     */
+    public function getFollowers(): Collection
+    {
+        return $this->followers;
+    }
+
+    public function addFollower(self $follower): static
+    {
+        if (!$this->followers->contains($follower)) {
+            $this->followers->add($follower);
+            $follower->addFollow($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFollower(self $follower): static
+    {
+        if ($this->followers->removeElement($follower)) {
+            $follower->removeFollow($this);
+        }
 
         return $this;
     }

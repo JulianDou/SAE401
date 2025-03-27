@@ -78,6 +78,34 @@ class PostController extends AbstractController
         return new JsonResponse(['message' => 'Your post has been created.'], 201);
     }
 
+    #[Route('/api/posts/followed', methods: ['GET'], format: 'json')]
+    public function getFollowedPosts(
+        PostRepository $postRepository,
+        UserRepository $userRepository,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): JsonResponse
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing. Try logging in ?'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Authorization token invalid. Try logging in ?'], 401);
+        }
+
+        $followedUsers = $user->getFollowing();
+        $followedPosts = [];
+        for ($i = 0; $i < count($followedUsers); $i++) {
+            $posts = $postRepository->findBy(['author' => $followedUsers[$i]]);
+            $followedPosts = array_merge($followedPosts, $posts);
+        }
+
+        return new JsonResponse($followedPosts);
+    }
+
     #[Route('/api/posts/{id}', methods: ['GET'], format: 'json')]
     public function get(PostRepository $postRepository, int $id, SerializerInterface $serializer): JsonResponse
     {

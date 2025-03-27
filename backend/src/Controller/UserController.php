@@ -193,6 +193,66 @@ class UserController extends AbstractController
         return new JsonResponse($response, 200, [], true);
     }
 
+    #[Route('/api/user/{id}/follow', methods: ['PATCH'], format: 'json')]
+    public function followUser(
+        int $id,
+        Request $request,
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager,
+    ): JsonResponse
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Invalid token'], 401);
+        }
+
+        $userToFollow = $userRepository->find($id);
+        if (!$userToFollow) {
+            return new JsonResponse(['message' => 'User not found'], 404);
+        }
+
+        $user->addFollow($userToFollow);
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return new JsonResponse(['message' => 'You are now following this user'], 200);
+    }
+
+    #[Route('/api/user/{id}/unfollow', methods: ['PATCH'], format: 'json')]
+    public function unfollowUser(
+        int $id,
+        Request $request,
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager,
+    ): JsonResponse
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Invalid token'], 401);
+        }
+
+        $userToUnfollow = $userRepository->find($id);
+        if (!$userToUnfollow) {
+            return new JsonResponse(['message' => 'User not found'], 404);
+        }
+
+        $user->removeFollow($userToUnfollow);
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return new JsonResponse(['message' => 'You have unfollowed this user'], 200);
+    }
+
     #[Route('/api/profile/{username}', methods: ['GET'], format: 'json')]
     public function getProfile(
         string $username,
@@ -216,19 +276,28 @@ class UserController extends AbstractController
             return $this->json(['error' => 'User not found'], 404);
         }
 
-        $user = $userRepository->findOneBy(['username' => $username]);
-         
-        if (!$user->isBanned()){
+        $targetUser = $userRepository->findOneBy(['username' => $username]);
+        $following = $targetUser->getFollowers();
+        $following = $following->toArray();
+        if (in_array($user, $following)) {
+            $isFollowing = true;
+        }
+        else {
+            $isFollowing = false;
+        }
+
+        if (!$targetUser->isBanned()){
             $user_safe = [
-                'id' => $user->getId(),
-                'username' => $user->getUsername(),
-                'email' => $user->getEmail(),
+                'id' => $targetUser->getId(),
+                'username' => $targetUser->getUsername(),
+                'email' => $targetUser->getEmail(),
+                'following' => $isFollowing,
             ];
         }
         else {
             $user_safe = [
-                'id' => $user->getId(),
-                'username' => $user->getUsername(),
+                'id' => $targetUser->getId(),
+                'username' => $targetUser->getUsername(),
                 'email' => 'This user has been banned.',
             ];
         }

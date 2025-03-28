@@ -69,11 +69,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: self::class, mappedBy: 'follows')]
     private Collection $followers;
 
+    /**
+     * @var Collection<int, Post>
+     */
+    #[ORM\ManyToMany(targetEntity: Post::class, mappedBy: 'likes')]
+    private Collection $likedPosts;
+
     public function __construct()
     {
         $this->posts = new ArrayCollection();
         $this->follows = new ArrayCollection();
         $this->followers = new ArrayCollection();
+        $this->likedPosts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -280,6 +287,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->followers->removeElement($follower)) {
             $follower->removeFollow($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Post>
+     */
+    public function getLikedPosts(): Collection
+    {
+        return $this->likedPosts;
+    }
+
+    public function addLikedPost(Post $likedPost): static
+    {
+        if (!$this->likedPosts->contains($likedPost)) {
+            $this->likedPosts->add($likedPost);
+            $likedPost->addLike($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLikedPost(Post $likedPost): static
+    {
+        if ($this->likedPosts->removeElement($likedPost)) {
+            $likedPost->removeLike($this);
         }
 
         return $this;

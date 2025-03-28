@@ -145,6 +145,7 @@ export default function User() {
                                         username: post.author.username
                                     }}
                                     image={post.image}
+                                    likes={post.likes}
                                 />
                             ))
                         }

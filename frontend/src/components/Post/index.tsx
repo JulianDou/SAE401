@@ -1,6 +1,7 @@
 import ProfilePic from "../../ui/ProfilePic";
 import Image from "../../ui/Image";
 import Username from "../../ui/Username";
+import Likes from "../../ui/Likes/Index";
 
 interface PostProps {
     id: number;
@@ -11,9 +12,16 @@ interface PostProps {
         username: string;
     }
     image?: string;
+    likes: [
+        {
+            id?: number;
+            username?: string;
+        }
+    ];
 }
 
 export default function Post(props: PostProps) {
+    const userid = localStorage.getItem("user_id");
     
     const formattedTime = new Date(props.time).toLocaleString('en-US', {
         year: 'numeric',
@@ -36,6 +44,13 @@ export default function Post(props: PostProps) {
                 {props.image && 
                     <Image src={props.image} alt={props.author.username + "'s post's image"} maxHeight={500}/>
                 }
+                <div className="flex gap-2 justify-end">
+                    <Likes 
+                        postId={props.id} 
+                        count={props.likes.length} 
+                        liked={props.likes.some((like) => like.id === parseInt(userid ? userid : "0", 10))}
+                    />
+                </div>
             </div>
         </div>
     )

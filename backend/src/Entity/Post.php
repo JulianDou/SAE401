@@ -107,4 +107,9 @@ class Post
 
         return $this;
     }
+
+    public function isLikedBy(User $user): bool
+    {
+        return $this->likes->contains($user);
+    }
 }

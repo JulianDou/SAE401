@@ -71,6 +71,7 @@ export default function Feed() {
                                     username: post.author.username
                                 }}
                                 image={post.image}
+                                likes={post.likes}
                             />
                         ))
                     }

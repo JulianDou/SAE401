@@ -118,5 +118,44 @@ class PostController extends AbstractController
         return JsonResponse::fromJsonString($res);
     }
 
+    #[Route('/api/posts/{id}/likemanager', methods: ['PATCH'], format: 'json')]
+    public function like(
+        int $id,
+        Request $request,
+        PostRepository $postRepository,
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager
+    )
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing. Try logging in ?'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Authorization token invalid. Try logging in ?'], 401);
+        }
+
+        $post = $postRepository->find($id);
+        if (!$post) {
+            return new JsonResponse(['message' => 'Post not found.'], 404);
+        }
+
+        if ($post->isLikedBy($user)) {
+            $post->removeLike($user);
+
+            $entityManager->persist($post);
+            $entityManager->flush();
+            return new JsonResponse(['message' => 'Post unliked.', 'status' => 'removed'], 200);
+        } else {
+            $post->addLike($user);
+
+            $entityManager->persist($post);
+            $entityManager->flush();
+            return new JsonResponse(['message' => 'Post liked.', 'status' => 'added'], 200);
+        }
+    }
+
 }
 

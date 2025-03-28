@@ -191,6 +191,12 @@ class UserController extends AbstractController
             $posts = [];
         }
 
+        if ($targetUser->getId( ) === $user->getId()) {
+            foreach ($posts as $post) {
+                $post->setBelongsToUser(true);
+            }
+        }
+
         $response = $serializer->serialize($posts, 'json', ['groups' => ['post:read']]);
         return new JsonResponse($response, 200, [], true);
     }

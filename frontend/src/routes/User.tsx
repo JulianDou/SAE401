@@ -151,6 +151,7 @@ export default function User() {
                                     }}
                                     image={post.image}
                                     likes={post.likes}
+                                    belongsToUser={post.belongs_to_user}
                                 />
                             ))
                         }

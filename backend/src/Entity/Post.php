@@ -38,6 +38,10 @@ class Post
     #[Groups(['post:read'])]
     private Collection $likes;
 
+    #[ORM\Column]
+    #[Groups(['post:read'])]
+    private ?bool $belongsToUser = null;
+
     public function __construct()
     {
         $this->likes = new ArrayCollection();
@@ -111,5 +115,17 @@ class Post
     public function isLikedBy(User $user): bool
     {
         return $this->likes->contains($user);
+    }
+
+    public function isBelongsToUser(): ?bool
+    {
+        return $this->belongsToUser;
+    }
+
+    public function setBelongsToUser(bool $belongsToUser): static
+    {
+        $this->belongsToUser = $belongsToUser;
+
+        return $this;
     }
 }

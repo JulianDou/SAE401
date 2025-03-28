@@ -187,6 +187,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function removeToken(): static
+    {
+        $this->token = null;
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, Post>
      */

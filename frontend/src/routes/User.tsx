@@ -22,7 +22,8 @@ export async function loader({params}: {params: Params<string>}) {
         username: userData.username,
         email: userData.email,
         posts: postsData,
-        following: userData.following
+        following: userData.following,
+        belongsToUser: userData.belongsToUser
     }
     return data;
 }
@@ -119,9 +120,10 @@ export default function User() {
                 </div>
                 <p className="text-2xl font-bold -order-2">{data.username}</p>
                 <p className="text-lg text-main-slate -order-2">{data.email}</p>
-                <div className="flex items-center gap-2.5 -order-2">
+                <div className={`flex items-center gap-2.5 -order-2`}>
                     <button 
                         className={`
+                            ${data.belongsToUser ? 'hidden' : ''}
                             flex items-center justify-center rounded-md px-5 py-2.5 hover:cursor-pointer
                             ${following ? "bg-main-black text-white" : "border-2 border-main-black text-main-black"}
                         `}
@@ -129,6 +131,9 @@ export default function User() {
                     >
                         {following ? "Unfollow" : "Follow"}
                     </button>
+                    {data.belongsToUser ? (
+                        <p className="text-main-slate">This is your profile.</p>
+                    ) : ""}
                 </div>
                 <div className="flex w-full flex-col">
                     <p className="font-bold text-lg">Posts</p>

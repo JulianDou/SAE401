@@ -22,8 +22,23 @@ class PostController extends AbstractController
 {
 
     #[Route('/api/posts', methods: ['GET'], format: 'json')]
-    public function index(PostRepository $postRepository, Request $request, SerializerInterface $serializer): JsonResponse
+    public function index(
+        UserRepository $userRepository,
+        PostRepository $postRepository, 
+        Request $request, 
+        SerializerInterface $serializer
+    ): JsonResponse
     {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing. Try logging in ?'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Authorization token invalid. Try logging in ?'], 401);
+        }
+
         $page = max(1, (int) $request->query->get('page', 1));
         $offset = 50 * ($page - 1);
 
@@ -32,6 +47,10 @@ class PostController extends AbstractController
         foreach ($paginator as $post) {
             if ($post->getAuthor()->isBanned()){
                 $post->setText('This user has been banned. As such, their posts are no longer visible.');
+            }
+            if ($post->getAuthor()->getId() === $user->getId()) {
+                $post->setBelongsToUser(true);
+                // Data NOT flushed on purpose to avoid changes being saved to database
             }
         }
         
@@ -71,6 +90,7 @@ class PostController extends AbstractController
         $post->setAuthor($user);
         $post->setText($data['text']);
         $post->setTime(new \DateTime());
+        $post->setBelongsToUser(false);
 
         $entityManager->persist($post);
         $entityManager->flush();
@@ -116,6 +136,40 @@ class PostController extends AbstractController
         $post = $postRepository->find($id);
         $res = $serializer->serialize($post, 'json');
         return JsonResponse::fromJsonString($res);
+    }
+
+    #[Route('/api/posts/{id}', methods: ['DELETE'], format: 'json')]
+    public function delete(
+        int $id,
+        PostRepository $postRepository,
+        UserRepository $userRepository,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): JsonResponse
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing. Try logging in ?'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Authorization token invalid. Try logging in ?'], 401);
+        }
+
+        $post = $postRepository->find($id);
+        if (!$post) {
+            return new JsonResponse(['message' => 'Post not found.'], 404);
+        }
+
+        if ($post->getAuthor()->getId() !== $user->getId()) {
+            return new JsonResponse(['message' => 'You are not the author of this post.'], 403);
+        }
+
+        $entityManager->remove($post);
+        $entityManager->flush();
+
+        return new JsonResponse(['message' => 'Post deleted.'], 200);
     }
 
     #[Route('/api/posts/{id}/likemanager', methods: ['PATCH'], format: 'json')]

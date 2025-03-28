@@ -132,6 +132,7 @@ class UserController extends AbstractController
                     break;
                 case 'banned':
                     if ($modification['value'] === 'true'){
+                        $userToUpdate->removeToken();
                         $userToUpdate->setBanned(true);
                     }
                     else {
@@ -153,6 +154,7 @@ class UserController extends AbstractController
                 'email' => $userToUpdate->getEmail(),
                 'verified' => $userToUpdate->isVerified(),
                 'admin' => $userToUpdate->getIsAdmin(),
+                'banned' => $userToUpdate->isBanned(),
             ]
         ], 200);
     }
@@ -253,6 +255,7 @@ class UserController extends AbstractController
         return new JsonResponse(['message' => 'You have unfollowed this user'], 200);
     }
 
+    // Works with username rather than ID
     #[Route('/api/profile/{username}', methods: ['GET'], format: 'json')]
     public function getProfile(
         string $username,
@@ -292,6 +295,7 @@ class UserController extends AbstractController
                 'username' => $targetUser->getUsername(),
                 'email' => $targetUser->getEmail(),
                 'following' => $isFollowing,
+                'belongsToUser' => $user->getId() === $targetUser->getId(),
             ];
         }
         else {

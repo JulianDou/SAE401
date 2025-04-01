@@ -209,11 +209,25 @@ class UserController extends AbstractController
             $posts = [];
         }
 
-        if ($targetUser->getId( ) === $user->getId()) {
-            foreach ($posts as $post) {
+        foreach ($posts as $post) {
+            if ($targetUser->getId( ) === $user->getId()) {
                 $post->setBelongsToUser(true);
             }
+            else {
+                // Check if the user is blocked by the target user        
+                $blockedClient = $targetUser->getBlockedUsers();
+                $blockedClient = $blockedClient->toArray();
+                if (in_array($user, $blockedClient)) {
+                    $post->setUserBlockedByAuthor(true);
+                    // Data not flushed to avoid saving data to database
+                }
+                else {
+                    $post->setUserBlockedByAuthor(false);
+                }
+            }
         }
+
+
 
         $response = $serializer->serialize($posts, 'json', ['groups' => ['post:read']]);
         return new JsonResponse($response, 200, [], true);
@@ -353,6 +367,7 @@ class UserController extends AbstractController
         string $username,
         Request $request,
         UserRepository $userRepository,
+        SerializerInterface $serializer
     ): JsonResponse 
     {
         $token = $request->headers->get('Authorization');
@@ -403,6 +418,16 @@ class UserController extends AbstractController
             $isBlocked = false;
         }
 
+        $blockedUsers = $targetUser->getBlockedUsers();
+        $blockedUsers = $blockedUsers->toArray();
+        $blockedUsers_safe = [];
+        foreach ($blockedUsers as $user_in_list) {
+            $blockedUsers_safe[] = [
+                'id' => $user_in_list->getId(),
+                'username' => $user_in_list->getUsername(),
+            ];
+        }
+
         if (!$targetUser->isBanned()){
             $user_safe = [
                 'id' => $targetUser->getId(),
@@ -412,6 +437,7 @@ class UserController extends AbstractController
                 'blockedUser' => $blockedUser,
                 'isBlocked' => $isBlocked,
                 'belongsToUser' => $user->getId() === $targetUser->getId(),
+                'blockedUsers' => $blockedUsers_safe,
             ];
         }
         else {
@@ -422,7 +448,8 @@ class UserController extends AbstractController
             ];
         }
         
-        return $this->json($user_safe);
+        $response = $serializer->serialize($user_safe, 'json', ['groups' => ['user:read']]);
+        return new JsonResponse($response, 200, [], true);
     }
 
 }

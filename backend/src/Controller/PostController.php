@@ -42,19 +42,19 @@ class PostController extends AbstractController
         $page = max(1, (int) $request->query->get('page', 1));
         $offset = 50 * ($page - 1);
 
-        $paginator = $postRepository->findAllLatest($offset, 50);
+        $blockedAuthors = $user->getBlockedUsers()->toArray();
+
+        $paginator = $postRepository->findAllLatest($offset, 50, $blockedAuthors);
 
         foreach ($paginator as $post) {
-            if ($post->getAuthor()->isBanned()){
+            if ($post->getAuthor()->isBanned()){ // Check if author is banned
                 $post->setText('This user has been banned. As such, their posts are no longer visible.');
             }
-            if ($post->getAuthor()->getId() === $user->getId()) {
+            if ($post->getAuthor()->getId() === $user->getId()) { // Check if user is author
                 $post->setBelongsToUser(true);
                 // Data NOT flushed on purpose to avoid changes being saved to database
             }
-            if (
-                in_array($user, $post->getAuthor()->getBlockedUsers()->toArray())
-            ){
+            if (in_array($user, $post->getAuthor()->getBlockedUsers()->toArray())){ // Check if user is blocked by author
                 $post->setUserBlockedByAuthor(true);
                 // Again, data NOT flushed on purpose to avoid changes being saved to database
             }

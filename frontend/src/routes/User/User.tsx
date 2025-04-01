@@ -256,6 +256,7 @@ export default function User() {
                                     image={post.image}
                                     likes={post.likes}
                                     belongsToUser={post.belongs_to_user}
+                                    userBlockedByAuthor={post.user_blocked_by_author}
                                 />
                             ))
                         }

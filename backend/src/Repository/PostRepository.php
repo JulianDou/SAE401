@@ -17,10 +17,12 @@ class PostRepository extends ServiceEntityRepository
         parent::__construct($registry, Post::class);
     }
 
-    public function findAllLatest($offset, $count): Paginator
+    public function findAllLatest($offset, $count, $blockedAuthors): Paginator
     {
         $query = $this->createQueryBuilder('p')
             ->orderBy('p.time', 'DESC')
+            ->andWhere('p.author NOT IN (:blockedAuthors)')
+            ->setParameter('blockedAuthors', $blockedAuthors)
             ->setFirstResult($offset)
             ->setMaxResults($count)
             ->getQuery()

@@ -45,6 +45,10 @@ class Post
     #[Groups(['post:read'])]
     private ?bool $belongsToUser = null;
 
+    #[ORM\Column]
+    #[Groups(['post:read'])]
+    private ?bool $userBlockedByAuthor = null;
+
     public function __construct()
     {
         $this->likes = new ArrayCollection();
@@ -128,6 +132,18 @@ class Post
     public function setBelongsToUser(bool $belongsToUser): static
     {
         $this->belongsToUser = $belongsToUser;
+
+        return $this;
+    }
+
+    public function isUserBlockedByAuthor(): ?bool
+    {
+        return $this->userBlockedByAuthor;
+    }
+
+    public function setUserBlockedByAuthor(bool $userBlockedByAuthor): static
+    {
+        $this->userBlockedByAuthor = $userBlockedByAuthor;
 
         return $this;
     }

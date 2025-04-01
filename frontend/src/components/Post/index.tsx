@@ -21,6 +21,7 @@ interface PostProps {
         }
     ];
     belongsToUser: boolean;
+    userBlockedByAuthor: boolean;
 }
 
 export default function Post(props: PostProps) {
@@ -169,10 +170,12 @@ export default function Post(props: PostProps) {
                     <Image src={props.image} alt={props.author.username + "'s post's image"} maxHeight={500}/>
                 }
                 <div className="flex flex-row-reverse gap-2 justify-start items-center">
+
                     <Likes 
                         postId={props.id} 
                         count={props.likes.length} 
                         liked={props.likes.some((like) => like.id === parseInt(userid ? userid : "0", 10))}
+                        blocked={props.userBlockedByAuthor}
                     />
                     
                     { // Icone suppression

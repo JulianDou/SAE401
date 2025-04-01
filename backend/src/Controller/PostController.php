@@ -52,6 +52,12 @@ class PostController extends AbstractController
                 $post->setBelongsToUser(true);
                 // Data NOT flushed on purpose to avoid changes being saved to database
             }
+            if (
+                in_array($user, $post->getAuthor()->getBlockedUsers()->toArray())
+            ){
+                $post->setUserBlockedByAuthor(true);
+                // Again, data NOT flushed on purpose to avoid changes being saved to database
+            }
         }
         
         $previousPage = $page > 1 ? $page - 1 : null;
@@ -81,6 +87,10 @@ class PostController extends AbstractController
         $user = $userRepository->findOneBy(['token' => $token]);
         if (!$user) {
             return new JsonResponse(['message' => 'Authorization token invalid. Try logging in ?'], 401);
+        }
+
+        if ($user->isBanned()) {
+            return new JsonResponse(['message' => 'You are banned. You cannot post.'], 403);
         }
 
         $content = $request->getContent();
@@ -235,6 +245,13 @@ class PostController extends AbstractController
         $post = $postRepository->find($id);
         if (!$post) {
             return new JsonResponse(['message' => 'Post not found.'], 404);
+        }
+
+        // Check if the user is blocked by the post author
+        if (
+            in_array($user, $post->getAuthor()->getBlockedUsers()->toArray())
+        ){
+            return new JsonResponse(['message' => 'You are blocked by the author of this post.'], 403);
         }
 
         if ($post->isLikedBy($user)) {

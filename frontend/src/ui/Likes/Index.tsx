@@ -5,15 +5,19 @@ interface likesProps {
     postId: number;
     count: number;
     liked: boolean;
+    blocked: boolean;
 }
 
 export default function Likes(props: likesProps) {
     const [likedStatus, setLikedStatus] = useState(props.liked);
     const [likesCount, setLikesCount] = useState(props.count);
-    const [errorMessage, setErrorMessage] = useState("");
     const token = localStorage.getItem("auth_token");
 
     function handleLike() {
+        if (props.blocked) {
+            return;
+        }
+
         fetch (api_url + "posts/" + props.postId + "/likemanager", {
             method: "PATCH",
             credentials: "include",
@@ -30,11 +34,11 @@ export default function Likes(props: likesProps) {
             }
             res.then((data) => {
                 if (data.message === undefined) {
-                    setErrorMessage("An unexpected error occurred...");
+                    alert("An unexpected error occurred...");
                     return;
                 }
                 else {
-                    setErrorMessage("");
+                    alert("");
                     switch (data.status) {
                         case "added":
                             setLikedStatus(true);
@@ -50,18 +54,15 @@ export default function Likes(props: likesProps) {
             })
         })
         .catch((error) => {
-            setErrorMessage(error.message);
+            alert(error.message);
         });
     }
     
     return (
         <div className="flex gap-2 h-6 w-fit">
-            <p className={`${errorMessage == "" ? 'hidden' : ''} text-sm text-main-red`}>
-                {errorMessage}
-            </p>
             <img 
                 onClick={handleLike}
-                className="hover:cursor-pointer"
+                className={props.blocked ? '' : 'hover:cursor-pointer'}
                 src={likedStatus ? "/assets/icons/like_true.svg" : "/assets/icons/like_false.svg"}
                 alt="like" 
             />

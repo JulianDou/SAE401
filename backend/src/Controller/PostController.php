@@ -43,8 +43,12 @@ class PostController extends AbstractController
         $offset = 50 * ($page - 1);
 
         $blockedAuthors = $user->getBlockedUsers()->toArray();
-
-        $paginator = $postRepository->findAllLatest($offset, 50, $blockedAuthors);
+        if (count($blockedAuthors) > 0) {
+            $paginator = $postRepository->findAllLatestFiltered($offset, 50, $blockedAuthors);
+        }
+        else {
+            $paginator = $postRepository->findAllLatest($offset, 50);
+        }
 
         foreach ($paginator as $post) {
             if ($post->getAuthor()->isBanned()){ // Check if author is banned
@@ -101,6 +105,7 @@ class PostController extends AbstractController
         $post->setText($data['text']);
         $post->setTime(new \DateTime());
         $post->setBelongsToUser(false);
+        $post->setUserBlockedByAuthor(false);
 
         $entityManager->persist($post);
         $entityManager->flush();

@@ -36,6 +36,9 @@ class Post
      */
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'likedPosts')]
     #[Groups(['post:read'])]
+    #[ORM\JoinTable(name: 'likes')]
+    #[ORM\JoinColumn(name: 'post_id', referencedColumnName: 'id')]
+    #[ORM\InverseJoinColumn(name: 'user_id', referencedColumnName: 'id')]
     private Collection $likes;
 
     #[ORM\Column]

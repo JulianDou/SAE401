@@ -14,6 +14,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
+
 #[UniqueEntity(fields: ['username'], message: 'There is already an account with this username')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -61,6 +62,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, self>
      */
     #[ORM\ManyToMany(targetEntity: self::class, inversedBy: 'followers')]
+    #[ORM\JoinTable(name: 'user_follows')]
+    #[ORM\JoinColumn(name: 'follower_id', referencedColumnName: 'id')]
+    #[ORM\InverseJoinColumn(name: 'followedUser_id', referencedColumnName: 'id')]
     private Collection $follows;
 
     /**

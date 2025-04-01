@@ -43,17 +43,42 @@ class SecurityController extends AbstractController
             return new JsonResponse(['message' => "Invalid password."], 403);
         }
         
-        if ($user->isVerified() === false) {
+        if (!$user->isVerified()) {
             return new JsonResponse(['message' => "You are not yet verified. Check your emails ?"], 403);
+        }
+
+        if ($user->isBanned()) {
+            return new JsonResponse(['message' => "Your account has been deactivated. You can no longer log in."], 403);
         }
 
         $token = bin2hex(random_bytes(16));
         $user_repository->setToken($user, $token);
         $tokenTime = time();
 
-        $response = new JsonResponse(['token' => $token, 'time' => $tokenTime, 'userid' => $user->getId()]);
+        $response = new JsonResponse(['token' => $token, 'time' => $tokenTime, 'userid' => $user->getId(), 'username' => $user->getUsername()]);
 
         return $response;
+    }
+
+    #[Route('/api/logout', name: 'logout', methods: ['POST'])]
+    public function logout(
+        Request $request,
+        UserRepository $userRepository
+    ): JsonResponse
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing. You are not currently logged in.'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Authorization token invalid. Try logging in ?'], 401);
+        }
+
+        $userRepository->removeToken($user);
+
+        return new JsonResponse(['message' => 'You have been logged out.']);
     }
 
     // ---== Old signup, moved to RegistrationController.php ==---

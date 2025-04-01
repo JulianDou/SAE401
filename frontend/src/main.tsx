@@ -5,12 +5,13 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from './routes/Layout';
 import Error from './routes/Error';
 
-import Feed, {loader as feedLoader} from './routes/Feed';
+import Feed, {loader as feedLoader, forYouLoader as feedLoaderFollowed} from './routes/Feed';
 import LoginMain from './routes/Login/LoginMain';
 import Login from './routes/Login/Login';
 import Signup from './routes/Login/Signup';
 import Admin, {loader as adminLoader} from './routes/Admin/Admin';
 import Users, {loader as adminUsersLoader} from './routes/Admin/Users';
+import User, {loader as userLoader} from './routes/User';
 
 
 const router = createBrowserRouter([
@@ -24,12 +25,14 @@ const router = createBrowserRouter([
                 loader: feedLoader,
             },
             {
-                path: 'profile',
-                element: <h1>Profile</h1>,
+                path: 'user/:username',
+                element: <User />,
+                loader: userLoader,
             },
             {
-                path: 'notifications',
-                element: <h1>Notifications</h1>,
+                path: 'foryou',
+                element: <Feed />,
+                loader: feedLoaderFollowed,
             },
             {
                 path: 'login',

@@ -22,6 +22,7 @@ export default function Users() {
                                 email={user.email}
                                 verified={user.verified}
                                 admin={user.admin}
+                                banned={user.banned}
                             />
                         ))
                     }

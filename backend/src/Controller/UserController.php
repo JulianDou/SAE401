@@ -279,6 +279,66 @@ class UserController extends AbstractController
         return new JsonResponse(['message' => 'You have unfollowed this user'], 200);
     }
 
+    #[Route('/api/user/{id}/block', methods: ['PATCH'], format: 'json')]
+    public function blockUser(
+        int $id,
+        Request $request,
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager,
+    ): JsonResponse
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Invalid token'], 401);
+        }
+
+        $userToBlock = $userRepository->find($id);
+        if (!$userToBlock) {
+            return new JsonResponse(['message' => 'User not found'], 404);
+        }
+
+        $user->addBlockedUser($userToBlock);
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return new JsonResponse(['message' => 'You have blocked this user'], 200);
+    }
+
+    #[Route('/api/user/{id}/unblock', methods: ['PATCH'], format: 'json')]
+    public function unblockUser(
+        int $id,
+        Request $request,
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager,
+    ): JsonResponse
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Invalid token'], 401);
+        }
+
+        $userToUnblock = $userRepository->find($id);
+        if (!$userToUnblock) {
+            return new JsonResponse(['message' => 'User not found'], 404);
+        }
+
+        $user->removeBlockedUser($userToUnblock);
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return new JsonResponse(['message' => 'You have unblocked this user'], 200);
+    }
+
     // Works with username rather than ID
     #[Route('/api/profile/{username}', methods: ['GET'], format: 'json')]
     public function getProfile(

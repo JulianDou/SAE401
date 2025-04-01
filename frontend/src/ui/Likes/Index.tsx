@@ -55,7 +55,7 @@ export default function Likes(props: likesProps) {
     }
     
     return (
-        <div className="flex gap-2">
+        <div className="flex gap-2 h-6 w-fit">
             <p className={`${errorMessage == "" ? 'hidden' : ''} text-sm text-main-red`}>
                 {errorMessage}
             </p>

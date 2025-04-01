@@ -138,6 +138,47 @@ class PostController extends AbstractController
         return JsonResponse::fromJsonString($res);
     }
 
+    #[Route('/api/posts/{id}', methods: ['PATCH'], format: 'json')]
+    public function edit(
+        int $id,
+        PostRepository $postRepository,
+        UserRepository $userRepository,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): JsonResponse
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing. Try logging in ?'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Authorization token invalid. Try logging in ?'], 401);
+        }
+
+        $post = $postRepository->find($id);
+        if (!$post) {
+            return new JsonResponse(['message' => 'Post not found.'], 404);
+        }
+
+        if ($post->getAuthor()->getId() !== $user->getId()) {
+            return new JsonResponse(['message' => 'You are not the author of this post.'], 403);
+        }
+
+        $content = $request->getContent();
+        $data = json_decode($content, true);
+
+        if (isset($data['text'])) {
+            $post->setText($data['text']);
+            $entityManager->persist($post);
+            $entityManager->flush();
+            return new JsonResponse(['message' => 'Post updated.', 'text' => $post->getText()], 200);
+        }
+
+        return new JsonResponse(['message' => 'No data to update.'], 400);
+    }
+
     #[Route('/api/posts/{id}', methods: ['DELETE'], format: 'json')]
     public function delete(
         int $id,

@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigate } from "react-router-dom";
+import { useLoaderData, useNavigate, Link } from "react-router-dom";
 import { api_url } from '../../data/loaders';
 import { useState } from "react";
 
@@ -89,6 +89,16 @@ export default function UserEdit() {
         }
     
     };
+
+    
+    if (!data.belongs_to_user){
+        return (
+            <div className="w-full h-full flex flex-col gap-2.5 items-center justify-center">
+                <p className="text-lg text-red-500">You are not authorized to edit this profile.</p>
+                <Link to={`/user/${data.username}`} className='text-main-slate underline'>Go back</Link>
+            </div>
+        );
+    }
 
     return (
         <div className="self-stretch w-full h-full flex-grow relative overflow-y-auto">

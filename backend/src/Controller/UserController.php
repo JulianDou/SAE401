@@ -101,6 +101,24 @@ class UserController extends AbstractController
             return new JsonResponse(['message' => 'User not found'], 404);
         }
 
+        // Vérifier si les champs uniques sont déjà utilisés
+        // Fait avant les modifications pour éviter de changer d'autres infos tout en retournant une erreur
+        // (par exemple en changeant vers un email libre puis en essayant de changer vers un pseudo déjà pris)
+        foreach ($data as $modification) {
+            if ($modification['modified'] === 'username') {
+                $existingUser = $userRepository->findOneBy(['username' => $modification['value']]);
+                if ($existingUser && $existingUser->getId() !== $userToUpdate->getId()) {
+                    return new JsonResponse(['message' => 'Username already taken'], 400);
+                }
+            }
+            if ($modification['modified'] === 'email') {
+                $existingUser = $userRepository->findOneBy(['email' => $modification['value']]);
+                if ($existingUser && $existingUser->getId() !== $userToUpdate->getId()) {
+                    return new JsonResponse(['message' => 'Email already taken'], 400);
+                }
+            }
+        }
+
         // Parcourir les modifications
         foreach ($data as $modification) {
             if (!isset($modification['modified'], $modification['value'])) {

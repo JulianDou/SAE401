@@ -11,7 +11,8 @@ import Login from './routes/Login/Login';
 import Signup from './routes/Login/Signup';
 import Admin, {loader as adminLoader} from './routes/Admin/Admin';
 import Users, {loader as adminUsersLoader} from './routes/Admin/Users';
-import User, {loader as userLoader} from './routes/User';
+import User, {loader as userLoader} from './routes/User/User';
+import UserEdit from './routes/User/UserEdit';
 
 
 const router = createBrowserRouter([
@@ -27,6 +28,11 @@ const router = createBrowserRouter([
             {
                 path: 'user/:username',
                 element: <User />,
+                loader: userLoader,
+            },
+            {
+                path: 'user/:username/edit',
+                element: <UserEdit />,
                 loader: userLoader,
             },
             {

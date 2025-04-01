@@ -1,8 +1,8 @@
-import { useLoaderData, Params } from "react-router-dom"
-import { getUserProfilePosts, getUserProfile } from "../data/loaders"
+import { useLoaderData, Params, Link } from "react-router-dom"
+import { getUserProfilePosts, getUserProfile } from "../../data/loaders"
 import { useState } from "react"
-import Post from "../components/Post"
-import { api_url } from "../data/loaders";
+import Post from "../../components/Post"
+import { api_url } from "../../data/loaders";
 
 export async function loader({params}: {params: Params<string>}) {
     const { username } = params;
@@ -132,7 +132,7 @@ export default function User() {
                         {following ? "Unfollow" : "Follow"}
                     </button>
                     {data.belongsToUser ? (
-                        <p className="text-main-slate">This is your profile.</p>
+                        <p className="text-main-slate">This is your profile. <Link to="edit" className="underline">Edit</Link></p>
                     ) : ""}
                 </div>
                 <div className="flex w-full flex-col">

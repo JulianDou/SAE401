@@ -23,7 +23,9 @@ export async function loader({params}: {params: Params<string>}) {
         email: userData.email,
         posts: postsData,
         following: userData.following,
-        belongsToUser: userData.belongsToUser
+        belongsToUser: userData.belongsToUser,
+        blockedUser: userData.blockedUser,
+        isBlocked: userData.isBlocked
     }
     return data;
 }
@@ -31,6 +33,8 @@ export async function loader({params}: {params: Params<string>}) {
 export default function User() {
     const data = useLoaderData();
     const [following, setFollowing] = useState(data.following);
+    const [error, setError] = useState("");
+    const [blocked, setBlocked] = useState(data.isBlocked);
 
     function handleFollowBtn(){
         if (!following) {
@@ -42,6 +46,10 @@ export default function User() {
     }
 
     function handleFollow() {
+        if (data.blockedUser) {
+            return;
+        }
+
         const token = localStorage.getItem("auth_token");
 
         fetch (api_url + "user/" + data.id + "/follow", {
@@ -61,7 +69,7 @@ export default function User() {
             }
             res.then((data) => {
                 if (data.message === undefined) {
-                    alert(data.message);
+                    setError(data.message);
                     return;
                 }
                 else {
@@ -71,7 +79,7 @@ export default function User() {
             })
         })
         .catch((error) => {
-            alert(error.message);
+            setError(error.message);
         });
     }
 
@@ -109,6 +117,81 @@ export default function User() {
         });
     }
 
+    function handleBlockBtn() {
+        if (!blocked) {
+            handleBlock();
+        }
+        else {
+            handleUnblock();
+        }
+    }
+
+    function handleBlock() {
+        const token = localStorage.getItem("auth_token");
+        fetch (api_url + "user/" + data.id + "/block", {
+            method: "PATCH",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `${token}`
+            },
+        })
+        .then((response) => {
+            const res = response.json();
+            if (!response.ok) {
+                return res.then((err) => {
+                    throw new Error(err.message || "An error occurred...");
+                });
+            }
+            res.then((data) => {
+                if (data.message === undefined) {
+                    setError("An unexpected error occurred");
+                    return;
+                }
+                else {
+                    setBlocked(true);
+                    return;
+                }
+            })
+        })
+        .catch((error) => {
+            setError(error.message);
+        });
+    }
+
+    function handleUnblock() {
+        const token = localStorage.getItem("auth_token");
+        fetch (api_url + "user/" + data.id + "/unblock", {
+            method: "PATCH",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `${token}`
+            },
+        })
+        .then((response) => {
+            const res = response.json();
+            if (!response.ok) {
+                return res.then((err) => {
+                    throw new Error(err.message || "An error occurred...");
+                });
+            }
+            res.then((data) => {
+                if (data.message === undefined) {
+                    setError("An unexpected error occurred");
+                    return;
+                }
+                else {
+                    setBlocked(false);
+                    return;
+                }
+            })
+        })
+        .catch((error) => {
+            setError(error.message);
+        });
+    }
+
     return (
         <div className="self-stretch w-full h-full flex-grow relative overflow-y-auto">
             <div className="
@@ -124,8 +207,28 @@ export default function User() {
                     <button 
                         className={`
                             ${data.belongsToUser ? 'hidden' : ''}
-                            flex items-center justify-center rounded-md px-5 py-2.5 hover:cursor-pointer
-                            ${following ? "bg-main-black text-white" : "border-2 border-main-black text-main-black"}
+                            flex items-center justify-center rounded-md px-5 py-2.5
+                            ${
+                                blocked 
+                                ? 'bg-main-red text-white hover:cursor-pointer' 
+                                : 'border-2 border-main-red text-main-red hover:cursor-pointer'
+                            }
+                        `}
+                        onClick={handleBlockBtn}
+                    >
+                        {blocked ? "Unblock" : "Block"}
+                    </button>
+                    <button 
+                        className={`
+                            ${data.belongsToUser ? 'hidden' : ''}
+                            flex items-center justify-center rounded-md px-5 py-2.5
+                            ${
+                                data.blockedUser 
+                                    ? 'border-2 border-main-grey text-main-grey' 
+                                    : following 
+                                        ? 'bg-main-black text-white hover:cursor-pointer' 
+                                        : 'border-2 border-main-black text-main-black hover:cursor-pointer'
+                            }
                         `}
                         onClick={handleFollowBtn}
                     >
@@ -135,6 +238,7 @@ export default function User() {
                         <p className="text-main-slate">This is your profile. <Link to="edit" className="underline">Edit</Link></p>
                     ) : ""}
                 </div>
+                <p className="-order-2 text-main-red">{error}</p>
                 <div className="flex w-full flex-col">
                     <p className="font-bold text-lg">Posts</p>
                     <div className="w-full flex flex-col gap-8 py-2.5">

@@ -242,6 +242,13 @@ class UserController extends AbstractController
             return new JsonResponse(['message' => 'User not found'], 404);
         }
 
+        // Check if the user is blocked by the target user        
+        $blockedClient = $userToFollow->getBlockedUsers();
+        $blockedClient = $blockedClient->toArray();
+        if (in_array($user, $blockedClient)) {
+            return new JsonResponse(['message' => 'You are currently blocked by this user'], 403);
+        }
+
         $user->addFollow($userToFollow);
         $entityManager->persist($user);
         $entityManager->flush();
@@ -302,6 +309,7 @@ class UserController extends AbstractController
             return new JsonResponse(['message' => 'User not found'], 404);
         }
 
+        $userToBlock->removeFollow($user);
         $user->addBlockedUser($userToBlock);
         $entityManager->persist($user);
         $entityManager->flush();
@@ -364,6 +372,8 @@ class UserController extends AbstractController
         }
 
         $targetUser = $userRepository->findOneBy(['username' => $username]);
+
+        // Check if the user is following the target user
         $following = $targetUser->getFollowers();
         $following = $following->toArray();
         if (in_array($user, $following)) {
@@ -373,12 +383,34 @@ class UserController extends AbstractController
             $isFollowing = false;
         }
 
+        // Check if the user is blocked by the target user        
+        $blockedClient = $targetUser->getBlockedUsers();
+        $blockedClient = $blockedClient->toArray();
+        if (in_array($user, $blockedClient)) {
+            $blockedUser = true;
+        }
+        else {
+            $blockedUser = false;
+        }
+
+        // Check if the target user is blocked by the user
+        $blockedByClient = $user->getBlockedUsers();
+        $blockedByClient = $blockedByClient->toArray();
+        if (in_array($targetUser, $blockedByClient)) {
+            $isBlocked = true;
+        }
+        else {
+            $isBlocked = false;
+        }
+
         if (!$targetUser->isBanned()){
             $user_safe = [
                 'id' => $targetUser->getId(),
                 'username' => $targetUser->getUsername(),
                 'email' => $targetUser->getEmail(),
                 'following' => $isFollowing,
+                'blockedUser' => $blockedUser,
+                'isBlocked' => $isBlocked,
                 'belongsToUser' => $user->getId() === $targetUser->getId(),
             ];
         }

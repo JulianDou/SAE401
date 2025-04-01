@@ -90,8 +90,7 @@ export default function UserEdit() {
     
     };
 
-    
-    if (!data.belongs_to_user){
+    if (!data.belongsToUser){
         return (
             <div className="w-full h-full flex flex-col gap-2.5 items-center justify-center">
                 <p className="text-lg text-red-500">You are not authorized to edit this profile.</p>

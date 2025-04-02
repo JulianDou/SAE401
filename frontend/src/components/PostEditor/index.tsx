@@ -7,10 +7,11 @@ import Username from '../../ui/Username';
 interface PostEditorProps {
     id: number;
     username: string;
+    mode?: string;
 }
 
 export default function PostEditor(props: PostEditorProps) {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(props.mode === 'reply' ? true : false);
     const [message, setMessage] = useState('');
     const [popupOpen, setPopupOpen] = useState(false);
     const [cancelling, setCancelling] = useState(false);
@@ -75,6 +76,11 @@ export default function PostEditor(props: PostEditorProps) {
             text: text,
         }
 
+        if (props.mode === 'reply') {
+            console.log("replying to post " + props.id + " with text " + text);
+            return;
+        }
+
         fetch (api_url + "posts", {
             method: "POST",
             credentials: "include",
@@ -116,7 +122,14 @@ export default function PostEditor(props: PostEditorProps) {
             flex py-5 px-2.5 md:px-[25%] justify-center items-center gap-2.5 self-stretch relative
             border-t-[1px] border-main-grey        
         ">
-            <div className={`${open ? 'visible flex flex-col items-center gap-8 mt-2 mb-64 w-full md:min-w-96 md:my-8' : 'hidden'}`}>
+            <div className={`flex flex-col items-center gap-8 mt-2 w-full md:my-8 ${
+                open ? 
+                    props.mode === 'reply' ?
+                        'visible'
+                        : 'visible mb-64 md:min-w-96'
+                    : 'hidden'
+                }`
+            }>
                 <div className="flex gap-3 w-full">
                     <ProfilePic username={props.username} id={props.id} size={3}/>
                     <div className="flex flex-col gap-2.5 flex-auto">
@@ -128,7 +141,7 @@ export default function PostEditor(props: PostEditorProps) {
                             id="post-editor"
                             ref={textareaRef}
                             maxLength={280}
-                            placeholder="Enter your text here..." 
+                            placeholder={"Enter your " + (props.mode === "reply" ? 'reply' : 'text') + " here..." }
                             className="w-full text-main-slate active:border-0
                             focus:outline-none focus:border-0 resize-none"          
                             onInput={handleInput}
@@ -151,8 +164,12 @@ export default function PostEditor(props: PostEditorProps) {
                 <div className="flex flex-col p-8 gap-4 bg-white rounded shadow-lg">
                     <p>Are you sure you want to cancel writing ?</p>
                     <div className="flex w-full h-fit gap-4 justify-center">
-                        <button onClick={() => setCancelling(false)} className="flex h-fit justify-center p-2.5 rounded-4xl border-main-red border-2 text-main-red hover:cursor-pointer">No, keep my post</button>
-                        <button onClick={() => resetInput()} className="flex h-fit justify-center p-2.5 rounded-4xl bg-main-red text-white hover:cursor-pointer">Yes, cancel</button>
+                        <button onClick={() => setCancelling(false)} className="flex h-fit justify-center p-2.5 rounded-4xl border-main-red border-2 text-main-red hover:cursor-pointer">
+                            No, keep my {props.mode === 'reply' ? 'reply' : 'post'}
+                        </button>
+                        <button onClick={() => resetInput()} className="flex h-fit justify-center p-2.5 rounded-4xl bg-main-red text-white hover:cursor-pointer">
+                            Yes, cancel
+                        </button>
                     </div>
                 </div>
             </div>
@@ -164,16 +181,19 @@ export default function PostEditor(props: PostEditorProps) {
                     </div>
                 </div>
             </div>
-            <button className="
-                w-14 h-14 p-1 aspect-square rounded-full bg-main-white text-main-white absolute
-                left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 hover:cursor-pointer
-            "
-            onClick={() => setOpen(!open)}
-            >
-                <div className="w-full h-full rounded-full bg-main-black flex items-center justify-center">
-                    <p className={open ? 'text-2xl font-bold line -translate-y-0.5 translate-x-0.5 rotate-45' : 'text-2xl font-bold line -translate-y-0.5'}>+</p>
-                </div>
-            </button>
+            {
+                props.mode !== 'reply' &&
+                <button className="
+                        w-14 h-14 p-1 aspect-square rounded-full bg-main-white text-main-white absolute
+                        left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 hover:cursor-pointer
+                    "
+                    onClick={() => setOpen(!open)}
+                >
+                    <div className="w-full h-full rounded-full bg-main-black flex items-center justify-center">
+                            <p className={open ? 'text-2xl font-bold line -translate-y-0.5 translate-x-0.5 rotate-45' : 'text-2xl font-bold line -translate-y-0.5'}>+</p>
+                    </div>
+                </button>
+            }
         </div>
     );
 }

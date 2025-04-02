@@ -4,6 +4,7 @@ import Username from "../../ui/Username";
 import Likes from "../../ui/Likes/Index";
 import { useState, useRef } from "react";
 import { api_url } from "../../data/loaders";
+import PostEditor from "../PostEditor";
 
 interface PostProps {
     id: number;
@@ -25,16 +26,19 @@ interface PostProps {
 }
 
 export default function Post(props: PostProps) {
+
     const [initialText, setInitialText] = useState(props.text);
 
     const [deleting, setDeleting] = useState(false);
     const [deleted, setDeleted] = useState(false);
     const [editing, setEditing] = useState(false);
     const [editingText, setEditingText] = useState(initialText);
+    const [replying, setReplying] = useState(false);
     const [popupOpen, setPopupOpen] = useState(false);
     const [message, setMessage] = useState("");
     const [characters, setCharacters] = useState(props.text.length);
     const userid = localStorage.getItem("user_id");
+    const username = localStorage.getItem("username");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     
     const formattedTime = new Date(props.time).toLocaleString('en-US', {
@@ -197,11 +201,26 @@ export default function Post(props: PostProps) {
                         />
                     }
 
+                    { // Icone reponse
+                        !props.userBlockedByAuthor &&
+                        <img
+                            className="hover:cursor-pointer"
+                            onClick={() => setReplying(!replying)}
+                            src={"/assets/icons/reply_" + replying + ".svg"}
+                            alt="reply"
+                        />
+                    }
+
                     { // Bouton validation édition
                         editing &&
                         <button onClick={handleEdit} className="flex h-fit justify-center p-2.5 rounded-4xl bg-main-black text-white hover:cursor-pointer">Save edits</button>
                     }
                 </div>
+
+                {
+                    replying &&
+                    <PostEditor mode="reply" id={parseInt(userid ? userid : "0")} username={username ? username : "Unknown"}></PostEditor>
+                }
 
                 {/* Popup de suppression */}
                 <div className={`

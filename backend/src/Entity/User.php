@@ -94,6 +94,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: self::class, mappedBy: 'blockedUsers')]
     private Collection $blockedBy;
 
+    /**
+     * @var Collection<int, Reply>
+     */
+    #[ORM\OneToMany(targetEntity: Reply::class, mappedBy: 'author')]
+    private Collection $replies;
+
+    /**
+     * @var Collection<int, Reply>
+     */
+    #[ORM\ManyToMany(targetEntity: Reply::class, mappedBy: 'likes')]
+    private Collection $likedReplies;
+
     public function __construct()
     {
         $this->posts = new ArrayCollection();
@@ -102,6 +114,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->likedPosts = new ArrayCollection();
         $this->blockedUsers = new ArrayCollection();
         $this->blockedBy = new ArrayCollection();
+        $this->replies = new ArrayCollection();
+        $this->likedReplies = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -393,6 +407,63 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->blockedBy->removeElement($blockedBy)) {
             $blockedBy->removeBlockedUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reply>
+     */
+    public function getReplies(): Collection
+    {
+        return $this->replies;
+    }
+
+    public function addReply(Reply $reply): static
+    {
+        if (!$this->replies->contains($reply)) {
+            $this->replies->add($reply);
+            $reply->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReply(Reply $reply): static
+    {
+        if ($this->replies->removeElement($reply)) {
+            // set the owning side to null (unless already changed)
+            if ($reply->getAuthor() === $this) {
+                $reply->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reply>
+     */
+    public function getLikedReplies(): Collection
+    {
+        return $this->likedReplies;
+    }
+
+    public function addLikedReply(Reply $likedReply): static
+    {
+        if (!$this->likedReplies->contains($likedReply)) {
+            $this->likedReplies->add($likedReply);
+            $likedReply->addLike($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLikedReply(Reply $likedReply): static
+    {
+        if ($this->likedReplies->removeElement($likedReply)) {
+            $likedReply->removeLike($this);
         }
 
         return $this;

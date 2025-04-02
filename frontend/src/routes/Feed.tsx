@@ -60,6 +60,11 @@ export default function Feed() {
             <div className="self-stretch w-full h-full flex-grow relative overflow-y-auto">
                 <div className="absolute w-full flex-auto flex flex-col gap-8 py-2.5 px-5 md:px-[25%] items-center">
                     {
+                        data.posts.length === 0 ? (
+                            <div className="w-full h-full flex items-center justify-center">
+                                <h1 className="text-main-slate text-center">Nothing to see here... Looks like nobody's posted yet</h1>
+                            </div>
+                        ) :
                         data.posts.map((post: any) => (
                             <Post
                                 key={post.id}

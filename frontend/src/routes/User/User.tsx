@@ -3,6 +3,8 @@ import { getUserProfilePosts, getUserProfile } from "../../data/loaders"
 import { useState } from "react"
 import Post from "../../components/Post"
 import { api_url } from "../../data/loaders";
+import ProfilePic from "../../ui/ProfilePic";
+import Username from "../../ui/Username";
 
 export async function loader({params}: {params: Params<string>}) {
     const { username } = params;
@@ -25,7 +27,8 @@ export async function loader({params}: {params: Params<string>}) {
         following: userData.following,
         belongsToUser: userData.belongsToUser,
         blockedUser: userData.blockedUser,
-        isBlocked: userData.isBlocked
+        isBlocked: userData.isBlocked,
+        blockedUsers: userData.blockedUsers
     }
     return data;
 }
@@ -35,6 +38,7 @@ export default function User() {
     const [following, setFollowing] = useState(data.following);
     const [error, setError] = useState("");
     const [blocked, setBlocked] = useState(data.isBlocked);
+    const [currentTab, setCurrentTab] = useState("posts");
 
     function handleFollowBtn(){
         if (!following) {
@@ -239,10 +243,33 @@ export default function User() {
                     ) : ""}
                 </div>
                 <p className="-order-2 text-main-red">{error}</p>
-                <div className="flex w-full flex-col">
+                <div className="flex gap-2.5 w-full">
+                    <button 
+                        className={`${
+                            currentTab === 'posts' ? 'border-b-2 border-main-black' : 'text-main-slate'
+                        } px-2.5 py-2.5`}
+                        onClick={() => setCurrentTab('posts')}
+                    >
+                        Posts
+                    </button>
+                    <button 
+                        className={`${
+                            currentTab === 'blocks' ? 'border-b-2 border-main-black' : 'text-main-slate'
+                        } px-2.5 py-2.5`}
+                        onClick={() => setCurrentTab('blocks')}
+                    >
+                        Blocks
+                    </button>
+                </div>
+
+                {/* Posts */}
+                <div className={`${currentTab === 'posts' ? '' : 'hidden'} flex w-full flex-col`}>
                     <p className="font-bold text-lg">Posts</p>
                     <div className="w-full flex flex-col gap-8 py-2.5">
                         {
+                            data.posts.length === 0 ? (
+                                <p className="text-main-slate">{data.username} has not posted anything yet.</p>
+                            ) :
                             data.posts.map((post: any) => (
                                 <Post
                                     key={post.id}
@@ -258,6 +285,24 @@ export default function User() {
                                     belongsToUser={post.belongs_to_user}
                                     userBlockedByAuthor={post.user_blocked_by_author}
                                 />
+                            ))
+                        }
+                    </div>
+                </div>
+
+                {/* Blocked users */}
+                <div className={`${currentTab === 'blocks' ? '' : 'hidden'} flex w-full flex-col`}>
+                    <p className="font-bold text-lg">Blocked users</p>
+                    <div className="w-full flex flex-col gap-8 py-2.5">
+                        {
+                            data.blockedUsers.length === 0 ? (
+                                <p className="text-main-slate">{data.username} has not blocked anyone.</p>
+                            ) :
+                            data.blockedUsers.map((user: any) => (
+                                <div key={user.id} className="flex items-center gap-2.5">
+                                    <ProfilePic id={user.id} username={user.username} size={2} />
+                                    <Username id={user.id} username={user.username} />
+                                </div>
                             ))
                         }
                     </div>

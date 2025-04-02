@@ -251,6 +251,10 @@ class UserController extends AbstractController
             return new JsonResponse(['message' => 'Invalid token'], 401);
         }
 
+        if ($user->getId() === $id) {
+            return new JsonResponse(['message' => 'You cannot follow yourself'], 400);
+        }
+
         $userToFollow = $userRepository->find($id);
         if (!$userToFollow) {
             return new JsonResponse(['message' => 'User not found'], 404);
@@ -316,6 +320,10 @@ class UserController extends AbstractController
         $user = $userRepository->findOneBy(['token' => $token]);
         if (!$user) {
             return new JsonResponse(['message' => 'Invalid token'], 401);
+        }
+
+        if ($user->getId() === $id) {
+            return new JsonResponse(['message' => 'You cannot block yourself'], 400);
         }
 
         $userToBlock = $userRepository->find($id);

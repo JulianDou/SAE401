@@ -54,6 +54,7 @@ class Reply
     private ?Post $parentPost = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['reply:read'])]
     private ?string $media = null;
 
     public function __construct()

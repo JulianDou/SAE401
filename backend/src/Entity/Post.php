@@ -60,6 +60,7 @@ class Post
     private ?int $replyCount = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['post:read'])]
     private ?string $media = null;
 
     public function __construct()

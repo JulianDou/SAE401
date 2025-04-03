@@ -12,11 +12,13 @@ interface PostEditorProps {
 }
 
 export default function PostEditor(props: PostEditorProps) {
+    
     const [open, setOpen] = useState(props.mode === 'reply' ? true : false);
     const [message, setMessage] = useState('');
     const [popupOpen, setPopupOpen] = useState(false);
     const [cancelling, setCancelling] = useState(false);
     const [characters, setCharacters] = useState(0);
+    const [file, setFile] = useState<File | null>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     let currentTime = new Date().toLocaleString('en-US', {
@@ -69,12 +71,26 @@ export default function PostEditor(props: PostEditorProps) {
         }
     }
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setFile(e.target.files[0]);
+        }
+        console.log(file);
+    };
+
     function handleSubmit() {
         const token = localStorage.getItem("auth_token");
 
         const text = getInput();
-        const data = {
-            text: text,
+        const formData = new FormData();
+        if (!text) {
+            setPopupOpen(true);
+            setMessage("Please enter a text...");
+            return;
+        }
+        formData.append('text', text);
+        if (file) {
+            formData.append('media', file);
         }
 
         if (props.mode === 'reply') {
@@ -82,10 +98,9 @@ export default function PostEditor(props: PostEditorProps) {
                 method: "POST",
                 credentials: "include",
                 headers: {
-                    "Content-Type": "application/json",
                     "Authorization": `${token}`
                 },
-                body: JSON.stringify(data),
+                body: formData,
             })
             .then((response) => {
                 const res = response.json();
@@ -116,10 +131,9 @@ export default function PostEditor(props: PostEditorProps) {
             method: "POST",
             credentials: "include",
             headers: {
-                "Content-Type": "application/json",
                 "Authorization": `${token}`
             },
-            body: JSON.stringify(data),
+            body: formData,
         })
         .then((response) => {
             const res = response.json();
@@ -179,12 +193,33 @@ export default function PostEditor(props: PostEditorProps) {
                             onInput={handleInput}
                         />
                         <p className={characters > 0 ? (characters == 280 ? 'text-main-red' : 'text-main-grey') : 'hidden'}>{characters} / 280</p>
-                        {/* <div className="flex h-64 flex-col justify-center items-center bg-main-grey rounded-lg hover:cursor-pointer">
+                        <div
+                            className={`
+                                flex h-64 flex-col justify-center items-center rounded-lg hover:cursor-pointer
+                                ${file ? '' : 'bg-main-grey'}
+                            `}
+                            style={
+                                file ? {
+                                    backgroundImage: `url(${URL.createObjectURL(file)})`,
+                                    backgroundSize: 'contain',
+                                    backgroundPosition: 'center',
+                                    backgroundRepeat: 'no-repeat',
+                                } : {}
+                            }
+                            onClick={() => document.getElementById('file-input')?.click()}
+                        >
                             <div className="w-12 h-12 flex items-center justify-center p-1 aspect-square rounded-full bg-main-white">
                                 <p className="text-main-grey text-2xl font-bold line -translate-y-[3px]">+</p>
                             </div>
                             <p className="text-main-slate">Add Image</p>
-                        </div> */}
+                        </div>
+                        <input
+                            id="file-input"
+                            type="file"
+                            accept="image/*,video/*"
+                            className="hidden"
+                            onChange={handleFileChange}
+                        />
                     </div>
                 </div>
                 <div className={`${characters > 0 ? 'visible' : 'hidden'} flex w-full gap-4 justify-center md:justify-between`}>

@@ -25,6 +25,7 @@ interface PostProps {
     userBlockedByAuthor: boolean;
     replyCount?: number;
     isReply?: boolean;
+    media?: string;
 }
 
 export default function Post(props: PostProps) {
@@ -232,9 +233,16 @@ export default function Post(props: PostProps) {
                         <p className={characters > 0 ? (characters == 280 ? 'text-main-red' : 'text-main-grey') : 'hidden'}>{characters} / 280</p>
                     </div>
                 }
-                {props.image && 
-                    <Image src={props.image} alt={props.author.username + "'s post's image"} maxHeight={500}/>
-                }
+                {props.media ? (
+                    props.media.endsWith('.mp4') || props.media.endsWith('.webm') ? (
+                        <video controls className="w-full max-h-96">
+                            <source src={props.media} type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                    ) : (
+                        <Image src={props.media} alt={props.author.username + "'s post's image"} maxHeight={500}/>
+                    )
+                ) : null}
                 <div className="flex flex-row-reverse gap-2 justify-start items-center">
 
                     <Likes 

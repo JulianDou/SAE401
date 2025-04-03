@@ -17,6 +17,8 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Post;
 use Doctrine\ORM\EntityManager;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /* le nom de la classe doit être cohérent avec le nom du fichier */
 class PostController extends AbstractController
@@ -98,15 +100,28 @@ class PostController extends AbstractController
             return new JsonResponse(['message' => 'You are banned. You cannot post.'], 403);
         }
 
-        $content = $request->getContent();
-        $data = json_decode($content, true);
+        $content = $request->request->get('text');
+        $file = $request->files->get('media');
 
         $post = new Post();
         $post->setAuthor($user);
-        $post->setText($data['text']);
+        $post->setText($content);
         $post->setTime(new \DateTime());
         $post->setBelongsToUser(false);
         $post->setUserBlockedByAuthor(false);
+        $post->setReplyCount(0);
+
+        if ($file instanceof UploadedFile) {
+            $uploadsDir = $this->getParameter('uploads_directory'); // Configurez ce paramètre dans services.yaml
+            $filename = uniqid() . '.' . $file->guessExtension();
+
+            try {
+                $file->move($uploadsDir, $filename);
+                $post->setMedia('/uploads/' . $filename);
+            } catch (FileException $e) {
+                return new JsonResponse(['message' => 'Failed to upload file.'], 500);
+            }
+        }
 
         $entityManager->persist($post);
         $entityManager->flush();

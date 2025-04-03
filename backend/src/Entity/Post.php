@@ -57,7 +57,7 @@ class Post
 
     #[ORM\Column(nullable: true)]
     #[Groups(['post:read'])]
-    private ?bool $hasReplies = null;
+    private ?int $replyCount = null;
 
     public function __construct()
     {
@@ -189,14 +189,14 @@ class Post
         return $this;
     }
 
-    public function hasReplies(): ?bool
+    public function getReplyCount(): ?int
     {
-        return $this->hasReplies;
+        return $this->replyCount;
     }
 
-    public function setHasReplies(?bool $hasReplies): static
+    public function setReplyCount(?int $replyCount): static
     {
-        $this->hasReplies = $hasReplies;
+        $this->replyCount = $replyCount;
 
         return $this;
     }

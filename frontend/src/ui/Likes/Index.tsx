@@ -6,6 +6,7 @@ interface likesProps {
     count: number;
     liked: boolean;
     blocked: boolean;
+    isReply?: boolean;
 }
 
 export default function Likes(props: likesProps) {
@@ -17,8 +18,14 @@ export default function Likes(props: likesProps) {
         if (props.blocked) {
             return;
         }
+        
+        let target = 'posts/';
 
-        fetch (api_url + "posts/" + props.postId + "/likemanager", {
+        if (props.isReply) {
+            target = 'reply/';
+        }
+
+        fetch (api_url + target + props.postId + "/likemanager", {
             method: "PATCH",
             credentials: "include",
             headers: {
@@ -38,7 +45,6 @@ export default function Likes(props: likesProps) {
                     return;
                 }
                 else {
-                    alert("");
                     switch (data.status) {
                         case "added":
                             setLikedStatus(true);

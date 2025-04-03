@@ -284,7 +284,7 @@ export default function User() {
                                     likes={post.likes}
                                     belongsToUser={post.belongs_to_user}
                                     userBlockedByAuthor={post.user_blocked_by_author}
-                                    hasReplies={post.has_replies}
+                                    replyCount={post.reply_count}
                                 />
                             ))
                         }

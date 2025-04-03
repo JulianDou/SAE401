@@ -23,7 +23,7 @@ interface PostProps {
     ];
     belongsToUser: boolean;
     userBlockedByAuthor: boolean;
-    hasReplies: boolean;
+    replyCount?: number;
     isReply?: boolean;
 }
 
@@ -66,7 +66,12 @@ export default function Post(props: PostProps) {
     function handleDelete() {
         const token = localStorage.getItem("auth_token");
 
-        fetch (api_url + "posts/" + props.id, {
+        let target = "posts/";
+        if (props.isReply) {
+            target = "reply/";
+        }
+
+        fetch (api_url + target + props.id, {
             method: "DELETE",
             credentials: "include",
             headers: {
@@ -112,7 +117,13 @@ export default function Post(props: PostProps) {
             text: text,
         }
 
-        fetch (api_url + "posts/" + props.id, {
+        let target = "posts/";
+
+        if (props.isReply) {
+            target = "reply/";
+        }
+
+        fetch (api_url + target + props.id, {
             method: "PATCH",
             credentials: "include",
             headers: {
@@ -156,7 +167,7 @@ export default function Post(props: PostProps) {
             setRepliesOpen(false);
         }
         else {
-            if (replies.length > 0) {
+            if (replies.length > 0 && props.replyCount && props.replyCount === replies.length) {
                 setRepliesOpen(true);
                 console.log(replies);
                 return;
@@ -231,6 +242,7 @@ export default function Post(props: PostProps) {
                         count={props.likes.length} 
                         liked={props.likes.some((like) => like.id === parseInt(userid ? userid : "0", 10))}
                         blocked={props.userBlockedByAuthor}
+                        isReply={props.isReply}
                     />
                     
                     { // Icone suppression
@@ -270,11 +282,11 @@ export default function Post(props: PostProps) {
 
                 {
                     replying && !props.isReply &&
-                    <PostEditor mode="reply" id={parseInt(userid ? userid : "0")} username={username ? username : "Unknown"}></PostEditor>
+                    <PostEditor mode="reply" postId={props.id} id={parseInt(userid ? userid : "0")} username={username ? username : "Unknown"}></PostEditor>
                 }
 
                 {
-                    props.hasReplies &&
+                    props.replyCount &&
                     <div className="flex gap-2.5">
                         <p 
                         onClick={handleReplies}
@@ -288,6 +300,8 @@ export default function Post(props: PostProps) {
                                 repliesOpen ?
                                     'Hide replies' :
                                     'Show replies'
+                                +
+                                ' (' + props.replyCount + ')'
                             }
                         </p>
                     </div>                    
@@ -307,7 +321,6 @@ export default function Post(props: PostProps) {
                                 likes={reply.likes}
                                 belongsToUser={reply.belongs_to_user}
                                 userBlockedByAuthor={reply.user_blocked_by_author}
-                                hasReplies={false}
                                 isReply={true}
                             />
                         ))}

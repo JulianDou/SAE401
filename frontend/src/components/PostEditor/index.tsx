@@ -8,6 +8,7 @@ interface PostEditorProps {
     id: number;
     username: string;
     mode?: string;
+    postId?: number;
 }
 
 export default function PostEditor(props: PostEditorProps) {
@@ -77,7 +78,37 @@ export default function PostEditor(props: PostEditorProps) {
         }
 
         if (props.mode === 'reply') {
-            console.log("replying to post " + props.id + " with text " + text);
+            fetch (api_url + "reply/to/" + props.postId, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `${token}`
+                },
+                body: JSON.stringify(data),
+            })
+            .then((response) => {
+                const res = response.json();
+                if (!response.ok) {
+                    return res.then((err) => {
+                        throw new Error(err.message || "An error occurred...");
+                    });
+                }
+                res.then((data) => {
+                    if (data.message === undefined) {
+                        setPopupOpen(true);
+                        setMessage("An unexpected error occurred...");
+                    }
+                    else {
+                        setPopupOpen(true);
+                        setMessage(data.message);
+                    }
+                })
+            })
+            .catch((error) => {
+                setPopupOpen(true);
+                setMessage(error.message);
+            });
             return;
         }
 

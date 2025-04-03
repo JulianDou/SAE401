@@ -63,9 +63,6 @@ class PostController extends AbstractController
                 $post->setUserBlockedByAuthor(true);
                 // Again, data NOT flushed on purpose to avoid changes being saved to database
             }
-            if ($post->getReplies()->count() > 0) { // Check if post has replies (used by client to request them later)
-                $post->setHasReplies(true);
-            }
         }
         
         $previousPage = $page > 1 ? $page - 1 : null;

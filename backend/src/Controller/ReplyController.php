@@ -68,19 +68,18 @@ class ReplyController extends AbstractController
         $reply->setTime(new \DateTime());
         $reply->setBelongsToUser(false);
         $reply->setUserBlockedByAuthor(false);
+        $entityManager->persist($reply);
 
         $parentPost->addReply($reply);
+        $parentPost->setReplyCount($parentPost->getReplyCount() + 1);
         $entityManager->persist($parentPost);
         $entityManager->flush();
 
-        $entityManager->persist($reply);
         $entityManager->flush();
 
 
-        return new JsonResponse(['message' => 'Your post has been created.'], 201);
+        return new JsonResponse(['message' => 'Your reply has been created.'], 201);
     }
-
-    
 
     #[Route('/api/reply/{id}', methods: ['GET'], format: 'json')]
     public function get(ReplyRepository $replyRepository, int $id, SerializerInterface $serializer): JsonResponse
@@ -158,6 +157,10 @@ class ReplyController extends AbstractController
         if ($reply->getAuthor()->getId() !== $user->getId()) {
             return new JsonResponse(['message' => 'You are not the author of this reply.'], 403);
         }
+        $parentPost = $reply->getParentPost();
+        $parentPost->setReplyCount($parentPost->getReplyCount() - 1);
+        $parentPost->removeReply($reply);
+        $entityManager->persist($parentPost);
 
         $entityManager->remove($reply);
         $entityManager->flush();

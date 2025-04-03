@@ -59,6 +59,9 @@ class Post
     #[Groups(['post:read'])]
     private ?int $replyCount = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $media = null;
+
     public function __construct()
     {
         $this->likes = new ArrayCollection();
@@ -197,6 +200,18 @@ class Post
     public function setReplyCount(?int $replyCount): static
     {
         $this->replyCount = $replyCount;
+
+        return $this;
+    }
+
+    public function getMedia(): ?string
+    {
+        return $this->media;
+    }
+
+    public function setMedia(?string $media): static
+    {
+        $this->media = $media;
 
         return $this;
     }

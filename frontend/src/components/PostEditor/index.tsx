@@ -19,6 +19,7 @@ export default function PostEditor(props: PostEditorProps) {
     const [cancelling, setCancelling] = useState(false);
     const [characters, setCharacters] = useState(0);
     const [file, setFile] = useState<File | null>(null);
+    const [filePreview, setFilePreview] = useState<string | null>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     let currentTime = new Date().toLocaleString('en-US', {
@@ -36,6 +37,14 @@ export default function PostEditor(props: PostEditorProps) {
             textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
         }
     }, [open]);
+
+    useEffect(() => {
+        return () => {
+            if (filePreview) {
+                URL.revokeObjectURL(filePreview);
+            }
+        };
+    }, [filePreview]);
 
     const handleInput = () => {
         // Update current time on input
@@ -73,9 +82,15 @@ export default function PostEditor(props: PostEditorProps) {
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            setFile(e.target.files[0]);
+            const selectedFile = e.target.files[0];
+            setFile(selectedFile);
+
+            if (filePreview) {
+                URL.revokeObjectURL(filePreview);
+            }
+
+            setFilePreview(URL.createObjectURL(selectedFile));
         }
-        console.log(file);
     };
 
     function handleSubmit() {
@@ -199,8 +214,8 @@ export default function PostEditor(props: PostEditorProps) {
                                 ${file ? '' : 'bg-main-grey'}
                             `}
                             style={
-                                file ? {
-                                    backgroundImage: `url(${URL.createObjectURL(file)})`,
+                                filePreview ? {
+                                    backgroundImage: `url(${filePreview})`,
                                     backgroundSize: 'contain',
                                     backgroundPosition: 'center',
                                     backgroundRepeat: 'no-repeat',

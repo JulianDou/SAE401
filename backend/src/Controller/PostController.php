@@ -109,7 +109,6 @@ class PostController extends AbstractController
         $post->setTime(new \DateTime());
         $post->setBelongsToUser(false);
         $post->setUserBlockedByAuthor(false);
-        $post->setReplyCount(0);
 
         if ($file instanceof UploadedFile) {
             $uploadsDir = $this->getParameter('uploads_directory'); // Configurez ce paramètre dans services.yaml

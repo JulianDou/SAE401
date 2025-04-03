@@ -18,6 +18,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Post;
 use App\Entity\Reply;
 use Doctrine\ORM\EntityManager;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /* le nom de la classe doit être cohérent avec le nom du fichier */
 class ReplyController extends AbstractController
@@ -59,22 +61,39 @@ class ReplyController extends AbstractController
             return new JsonResponse(['message' => 'You are blocked by the author of this post. You cannot reply to it.'], 403);
         }
 
-        $content = $request->getContent();
-        $data = json_decode($content, true);
+        $text = $request->request->get('text');
+        $file = $request->files->get('media');
+
+        if (!$text) {
+            return new JsonResponse(['message' => 'Text is required.'], 400);
+        }
 
         $reply = new Reply();
         $reply->setAuthor($user);
-        $reply->setText($data['text']);
+        $reply->setText($text);
         $reply->setTime(new \DateTime());
         $reply->setBelongsToUser(false);
         $reply->setUserBlockedByAuthor(false);
+        $reply->setParentPost($parentPost);
+
+        if ($file instanceof UploadedFile) {
+            $uploadsDir = $this->getParameter('uploads_directory'); // Configurez ce paramètre dans services.yaml
+            $filename = uniqid() . '.' . $file->guessExtension();
+
+            try {
+                $file->move($uploadsDir, $filename);
+                $reply->setMedia('/uploads/' . $filename);
+            } catch (FileException $e) {
+                return new JsonResponse(['message' => 'Failed to upload file.'], 500);
+            }
+        }
+
         $entityManager->persist($reply);
+        $entityManager->flush();
 
         $parentPost->addReply($reply);
         $parentPost->setReplyCount($parentPost->getReplyCount() + 1);
         $entityManager->persist($parentPost);
-        $entityManager->flush();
-
         $entityManager->flush();
 
 
@@ -159,6 +178,9 @@ class ReplyController extends AbstractController
         }
         $parentPost = $reply->getParentPost();
         $parentPost->setReplyCount($parentPost->getReplyCount() - 1);
+        if ($parentPost->getReplyCount() <= 0) {
+            $parentPost->setReplyCount(null);
+        }
         $parentPost->removeReply($reply);
         $entityManager->persist($parentPost);
 

@@ -330,6 +330,7 @@ export default function Post(props: PostProps) {
                                 belongsToUser={reply.belongs_to_user}
                                 userBlockedByAuthor={reply.user_blocked_by_author}
                                 isReply={true}
+                                media={reply.media}
                             />
                         ))}
                     </div>

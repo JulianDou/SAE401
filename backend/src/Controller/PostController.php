@@ -11,6 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use App\Repository\PostRepository;
 use App\Repository\UserRepository;
+use App\Repository\ReplyRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Doctrine\ORM\EntityManagerInterface;
@@ -61,6 +62,9 @@ class PostController extends AbstractController
             if (in_array($user, $post->getAuthor()->getBlockedUsers()->toArray())){ // Check if user is blocked by author
                 $post->setUserBlockedByAuthor(true);
                 // Again, data NOT flushed on purpose to avoid changes being saved to database
+            }
+            if ($post->getReplies()->count() > 0) { // Check if post has replies (used by client to request them later)
+                $post->setHasReplies(true);
             }
         }
         
@@ -272,6 +276,56 @@ class PostController extends AbstractController
             $entityManager->flush();
             return new JsonResponse(['message' => 'Post liked.', 'status' => 'added'], 200);
         }
+    }
+
+    #[Route('/api/posts/{id}/replies', methods: ['GET'], format: 'json')]
+    public function getReplies(
+        int $id,
+        PostRepository $postRepository,
+        ReplyRepository $replyRepository,
+        UserRepository $userRepository,
+        Request $request,
+        SerializerInterface $serializer
+    ): JsonResponse
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing. Try logging in ?'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Authorization token invalid. Try logging in ?'], 401);
+        }
+
+        $post = $postRepository->find($id);
+        if (!$post) {
+            return new JsonResponse(['message' => 'Post not found.'], 404);
+        }
+
+        // Get replies for the post
+        $replies = $replyRepository->findBy(['parentPost' => $post]);
+
+        foreach ($replies as $reply){
+            if ($reply->getAuthor()->isBanned()){ // Check if author is banned
+                $reply->setText('This user has been banned. As such, their posts are no longer visible.');
+            }
+            if ($reply->getAuthor()->getId() === $user->getId()) { // Check if user is author
+                $reply->setBelongsToUser(true);
+                // Data NOT flushed on purpose to avoid changes being saved to database
+            }
+            if (in_array($user, $reply->getAuthor()->getBlockedUsers()->toArray())){ // Check if user is blocked by author
+                $reply->setUserBlockedByAuthor(true);
+                // Again, data NOT flushed on purpose to avoid changes being saved to database
+            }
+        }
+
+        // Serialize replies
+        $serializedReplies = $serializer->serialize($replies, 'json', [
+            AbstractNormalizer::GROUPS => ['reply:read'],
+        ]);
+
+        return JsonResponse::fromJsonString($serializedReplies);
     }
 
 }

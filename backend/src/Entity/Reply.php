@@ -6,6 +6,7 @@ use App\Repository\ReplyRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ReplyRepository::class)]
@@ -14,16 +15,20 @@ class Reply
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['reply:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 280)]
+    #[Groups(['reply:read'])]
     private ?string $text = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['reply:read'])]
     private ?\DateTimeInterface $time = null;
 
     #[ORM\ManyToOne(inversedBy: 'replies')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['reply:read'])]
     private ?User $author = null;
 
     /**
@@ -33,12 +38,15 @@ class Reply
     #[ORM\JoinTable(name: 'reply_likes')]
     #[ORM\JoinColumn(name: 'reply_id', referencedColumnName: 'id')]
     #[ORM\InverseJoinColumn(name: 'user_id', referencedColumnName: 'id')]
+    #[Groups(['reply:read'])]
     private Collection $likes;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['reply:read'])]
     private ?bool $belongsToUser = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['reply:read'])]
     private ?bool $userBlockedByAuthor = null;
 
     #[ORM\ManyToOne(inversedBy: 'replies')]

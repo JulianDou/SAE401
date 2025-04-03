@@ -118,10 +118,11 @@ export default function PostEditor(props: PostEditorProps) {
 
 
     return (
-        <div className="
-            flex py-5 px-2.5 md:px-[25%] justify-center items-center gap-2.5 self-stretch relative
-            border-t-[1px] border-main-grey        
-        ">
+        <div className={`
+            flex justify-center items-center gap-2.5 self-stretch relative
+            border-t-[1px] border-main-grey     
+            ${props.mode === 'reply' ? '' : 'md:px-[25%] py-5 px-2.5'}
+        `}>
             <div className={`flex flex-col items-center gap-8 mt-2 w-full md:my-8 ${
                 open ? 
                     props.mode === 'reply' ?

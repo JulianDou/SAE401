@@ -23,6 +23,8 @@ interface PostProps {
     ];
     belongsToUser: boolean;
     userBlockedByAuthor: boolean;
+    hasReplies: boolean;
+    isReply?: boolean;
 }
 
 export default function Post(props: PostProps) {
@@ -34,9 +36,11 @@ export default function Post(props: PostProps) {
     const [editing, setEditing] = useState(false);
     const [editingText, setEditingText] = useState(initialText);
     const [replying, setReplying] = useState(false);
+    const [repliesOpen, setRepliesOpen] = useState(false);
     const [popupOpen, setPopupOpen] = useState(false);
     const [message, setMessage] = useState("");
     const [characters, setCharacters] = useState(props.text.length);
+    const [replies, setReplies] = useState<any[]>([]);
     const userid = localStorage.getItem("user_id");
     const username = localStorage.getItem("username");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -147,6 +151,53 @@ export default function Post(props: PostProps) {
         });
     }
 
+    function handleReplies() {
+        if (repliesOpen) {
+            setRepliesOpen(false);
+        }
+        else {
+            if (replies.length > 0) {
+                setRepliesOpen(true);
+                console.log(replies);
+                return;
+            }
+
+            const token = localStorage.getItem("auth_token");
+
+            fetch (api_url + "posts/" + props.id + "/replies", {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    "Authorization": `${token}`
+                },
+            })
+            .then((response) => {
+                const res = response.json();
+                if (!response.ok) {
+                    return res.then((err) => {
+                        throw new Error(err.message || "An error occurred...");
+                    });
+                }
+                res.then((data) => {
+                    if (!data) {
+                        setPopupOpen(true);
+                        setMessage("An unexpected error occurred...");
+                        return;
+                    }
+                    else {
+                        setReplies(data);
+                        setRepliesOpen(true);
+                        return;
+                    }
+                })
+            })
+            .catch((error) => {
+                setPopupOpen(true);
+                setMessage(error.message);
+            });
+        }
+    }
+
     return (
         <div className={`${deleted ? 'hidden' : ''} relative flex gap-3 w-full`}>
             <ProfilePic username={props.author.username} id={props.author.id} size={3}/>
@@ -202,7 +253,7 @@ export default function Post(props: PostProps) {
                     }
 
                     { // Icone reponse
-                        !props.userBlockedByAuthor &&
+                        !props.userBlockedByAuthor && !props.isReply &&
                         <img
                             className="hover:cursor-pointer"
                             onClick={() => setReplying(!replying)}
@@ -218,8 +269,49 @@ export default function Post(props: PostProps) {
                 </div>
 
                 {
-                    replying &&
+                    replying && !props.isReply &&
                     <PostEditor mode="reply" id={parseInt(userid ? userid : "0")} username={username ? username : "Unknown"}></PostEditor>
+                }
+
+                {
+                    props.hasReplies &&
+                    <div className="flex gap-2.5">
+                        <p 
+                        onClick={handleReplies}
+                        className="
+                            flex w-full items-center gap-2.5
+                            before:content-[''] before:block before:w-full before:h-[1px] before:bg-main-grey before:border-0
+                            text-main-grey text-nowrap hover:cursor-pointer
+                            after:content-[''] after:block after:w-full after:h-[1px] after:bg-main-grey after:border-0
+                        ">
+                            {
+                                repliesOpen ?
+                                    'Hide replies' :
+                                    'Show replies'
+                            }
+                        </p>
+                    </div>                    
+                }
+
+                {
+                    repliesOpen && replies.length > 0 &&
+                    <div className="flex flex-col gap-2.5">
+                        {replies.map((reply) => (
+                            <Post 
+                                key={reply.id}
+                                id={reply.id}
+                                text={reply.text}
+                                time={reply.time}
+                                author={reply.author}
+                                image={reply.image}
+                                likes={reply.likes}
+                                belongsToUser={reply.belongs_to_user}
+                                userBlockedByAuthor={reply.user_blocked_by_author}
+                                hasReplies={false}
+                                isReply={true}
+                            />
+                        ))}
+                    </div>
                 }
 
                 {/* Popup de suppression */}

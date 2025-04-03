@@ -55,6 +55,10 @@ class Post
     #[ORM\OneToMany(targetEntity: Reply::class, mappedBy: 'parentPost')]
     private Collection $replies;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['post:read'])]
+    private ?bool $hasReplies = null;
+
     public function __construct()
     {
         $this->likes = new ArrayCollection();
@@ -181,6 +185,18 @@ class Post
                 $reply->setParentPost(null);
             }
         }
+
+        return $this;
+    }
+
+    public function hasReplies(): ?bool
+    {
+        return $this->hasReplies;
+    }
+
+    public function setHasReplies(?bool $hasReplies): static
+    {
+        $this->hasReplies = $hasReplies;
 
         return $this;
     }

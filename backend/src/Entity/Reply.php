@@ -57,6 +57,10 @@ class Reply
     #[Groups(['reply:read'])]
     private ?string $media = null;
 
+    #[ORM\Column]
+    #[Groups(['reply:read'])]
+    private ?bool $isCensored = null;
+
     public function __construct()
     {
         $this->likes = new ArrayCollection();
@@ -176,6 +180,18 @@ class Reply
     public function setMedia(?string $media): static
     {
         $this->media = $media;
+
+        return $this;
+    }
+
+    public function isCensored(): ?bool
+    {
+        return $this->isCensored;
+    }
+
+    public function setIsCensored(bool $isCensored): static
+    {
+        $this->isCensored = $isCensored;
 
         return $this;
     }

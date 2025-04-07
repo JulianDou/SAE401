@@ -116,6 +116,7 @@ class PostController extends AbstractController
         $post->setTime(new \DateTime());
         $post->setBelongsToUser(false);
         $post->setUserBlockedByAuthor(false);
+        $post->setIsCensored(false);
 
         if ($file instanceof UploadedFile) {
             $uploadsDir = $this->getParameter('uploads_directory'); // Configurez ce paramètre dans services.yaml
@@ -345,6 +346,10 @@ class PostController extends AbstractController
             if (in_array($user, $reply->getAuthor()->getBlockedUsers()->toArray())){ // Check if user is blocked by author
                 $reply->setUserBlockedByAuthor(true);
                 // Again, data NOT flushed on purpose to avoid changes being saved to database
+            }
+            if ($reply->isCensored()){
+                $reply->setText('This reply has been censored by moderation.');
+                // Data not flushed... etc.
             }
         }
 

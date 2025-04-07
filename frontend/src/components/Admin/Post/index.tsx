@@ -78,8 +78,13 @@ export default function PostAdminEdit(props: PostProps) {
 
     function handleCensor() {
         const token = localStorage.getItem("auth_token");
+        let target = "posts/"
 
-        fetch (api_url + "admin/posts/" + props.id + "/censor", {
+        if (props.isReply) {
+            target = "replies/"
+        }
+
+        fetch (api_url + "admin/" + target + props.id + "/censor", {
             method: "PATCH",
             credentials: "include",
             headers: {

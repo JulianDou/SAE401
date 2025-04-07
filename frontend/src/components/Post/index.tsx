@@ -4,6 +4,7 @@ import Username from "../../ui/Username";
 import Likes from "../../ui/Likes/Index";
 import { useState, useRef } from "react";
 import { api_url } from "../../data/loaders";
+import { server_url } from "../../data/loaders";
 import PostEditor from "../PostEditor";
 
 interface PostProps {
@@ -329,13 +330,20 @@ export default function Post(props: PostProps) {
                                 id={reply.id}
                                 text={reply.text}
                                 time={reply.time}
-                                author={reply.author}
+                                author={
+                                    {
+                                        id: reply.author.id,
+                                        username: reply.author.username,
+                                        avatar: reply.author.avatar ? server_url + reply.author.avatar : undefined
+                                    }
+                                }
                                 image={reply.image}
                                 likes={reply.likes}
                                 belongsToUser={reply.belongs_to_user}
                                 userBlockedByAuthor={reply.user_blocked_by_author}
                                 isReply={true}
                                 media={reply.media}
+                                isCensored={reply.is_censored}
                             />
                         ))}
                     </div>

@@ -7,14 +7,19 @@ import Username from '../../ui/Username';
 interface PostEditorProps {
     id: number;
     username: string;
+    mode?: string;
+    postId?: number;
 }
 
 export default function PostEditor(props: PostEditorProps) {
-    const [open, setOpen] = useState(false);
+    
+    const [open, setOpen] = useState(props.mode === 'reply' ? true : false);
     const [message, setMessage] = useState('');
     const [popupOpen, setPopupOpen] = useState(false);
     const [cancelling, setCancelling] = useState(false);
     const [characters, setCharacters] = useState(0);
+    const [file, setFile] = useState<File | null>(null);
+    const [filePreview, setFilePreview] = useState<string | null>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     let currentTime = new Date().toLocaleString('en-US', {
@@ -32,6 +37,14 @@ export default function PostEditor(props: PostEditorProps) {
             textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
         }
     }, [open]);
+
+    useEffect(() => {
+        return () => {
+            if (filePreview) {
+                URL.revokeObjectURL(filePreview);
+            }
+        };
+    }, [filePreview]);
 
     const handleInput = () => {
         // Update current time on input
@@ -67,22 +80,75 @@ export default function PostEditor(props: PostEditorProps) {
         }
     }
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const selectedFile = e.target.files[0];
+            setFile(selectedFile);
+
+            if (filePreview) {
+                URL.revokeObjectURL(filePreview);
+            }
+
+            setFilePreview(URL.createObjectURL(selectedFile));
+        }
+    };
+
     function handleSubmit() {
         const token = localStorage.getItem("auth_token");
 
         const text = getInput();
-        const data = {
-            text: text,
+        const formData = new FormData();
+        if (!text) {
+            setPopupOpen(true);
+            setMessage("Please enter a text...");
+            return;
+        }
+        formData.append('text', text);
+        if (file) {
+            formData.append('media', file);
+        }
+
+        if (props.mode === 'reply') {
+            fetch (api_url + "reply/to/" + props.postId, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Authorization": `${token}`
+                },
+                body: formData,
+            })
+            .then((response) => {
+                const res = response.json();
+                if (!response.ok) {
+                    return res.then((err) => {
+                        throw new Error(err.message || "An error occurred...");
+                    });
+                }
+                res.then((data) => {
+                    if (data.message === undefined) {
+                        setPopupOpen(true);
+                        setMessage("An unexpected error occurred...");
+                    }
+                    else {
+                        setPopupOpen(true);
+                        setMessage(data.message);
+                    }
+                })
+            })
+            .catch((error) => {
+                setPopupOpen(true);
+                setMessage(error.message);
+            });
+            return;
         }
 
         fetch (api_url + "posts", {
             method: "POST",
             credentials: "include",
             headers: {
-                "Content-Type": "application/json",
                 "Authorization": `${token}`
             },
-            body: JSON.stringify(data),
+            body: formData,
         })
         .then((response) => {
             const res = response.json();
@@ -112,11 +178,19 @@ export default function PostEditor(props: PostEditorProps) {
 
 
     return (
-        <div className="
-            flex py-5 px-2.5 md:px-[25%] justify-center items-center gap-2.5 self-stretch relative
-            border-t-[1px] border-main-grey        
-        ">
-            <div className={`${open ? 'visible flex flex-col items-center gap-8 mt-2 mb-64 w-full md:min-w-96 md:my-8' : 'hidden'}`}>
+        <div className={`
+            flex justify-center items-center gap-2.5 self-stretch relative
+            border-t-[1px] border-main-grey     
+            ${props.mode === 'reply' ? '' : 'md:px-[25%] py-5 px-2.5'}
+        `}>
+            <div className={`flex flex-col items-center gap-8 mt-2 w-full md:my-8 ${
+                open ? 
+                    props.mode === 'reply' ?
+                        'visible'
+                        : 'visible md:min-w-96'
+                    : 'hidden'
+                }`
+            }>
                 <div className="flex gap-3 w-full">
                     <ProfilePic username={props.username} id={props.id} size={3}/>
                     <div className="flex flex-col gap-2.5 flex-auto">
@@ -128,18 +202,39 @@ export default function PostEditor(props: PostEditorProps) {
                             id="post-editor"
                             ref={textareaRef}
                             maxLength={280}
-                            placeholder="Enter your text here..." 
+                            placeholder={"Enter your " + (props.mode === "reply" ? 'reply' : 'text') + " here..." }
                             className="w-full text-main-slate active:border-0
                             focus:outline-none focus:border-0 resize-none"          
                             onInput={handleInput}
                         />
                         <p className={characters > 0 ? (characters == 280 ? 'text-main-red' : 'text-main-grey') : 'hidden'}>{characters} / 280</p>
-                        {/* <div className="flex h-64 flex-col justify-center items-center bg-main-grey rounded-lg hover:cursor-pointer">
+                        <div
+                            className={`
+                                flex h-64 flex-col justify-center items-center rounded-lg hover:cursor-pointer
+                                ${file ? '' : 'bg-main-grey'}
+                            `}
+                            style={
+                                filePreview ? {
+                                    backgroundImage: `url(${filePreview})`,
+                                    backgroundSize: 'contain',
+                                    backgroundPosition: 'center',
+                                    backgroundRepeat: 'no-repeat',
+                                } : {}
+                            }
+                            onClick={() => document.getElementById('file-input')?.click()}
+                        >
                             <div className="w-12 h-12 flex items-center justify-center p-1 aspect-square rounded-full bg-main-white">
                                 <p className="text-main-grey text-2xl font-bold line -translate-y-[3px]">+</p>
                             </div>
                             <p className="text-main-slate">Add Image</p>
-                        </div> */}
+                        </div>
+                        <input
+                            id="file-input"
+                            type="file"
+                            accept="image/*,video/*"
+                            className="hidden"
+                            onChange={handleFileChange}
+                        />
                     </div>
                 </div>
                 <div className={`${characters > 0 ? 'visible' : 'hidden'} flex w-full gap-4 justify-center md:justify-between`}>
@@ -151,8 +246,12 @@ export default function PostEditor(props: PostEditorProps) {
                 <div className="flex flex-col p-8 gap-4 bg-white rounded shadow-lg">
                     <p>Are you sure you want to cancel writing ?</p>
                     <div className="flex w-full h-fit gap-4 justify-center">
-                        <button onClick={() => setCancelling(false)} className="flex h-fit justify-center p-2.5 rounded-4xl border-main-red border-2 text-main-red hover:cursor-pointer">No, keep my post</button>
-                        <button onClick={() => resetInput()} className="flex h-fit justify-center p-2.5 rounded-4xl bg-main-red text-white hover:cursor-pointer">Yes, cancel</button>
+                        <button onClick={() => setCancelling(false)} className="flex h-fit justify-center p-2.5 rounded-4xl border-main-red border-2 text-main-red hover:cursor-pointer">
+                            No, keep my {props.mode === 'reply' ? 'reply' : 'post'}
+                        </button>
+                        <button onClick={() => resetInput()} className="flex h-fit justify-center p-2.5 rounded-4xl bg-main-red text-white hover:cursor-pointer">
+                            Yes, cancel
+                        </button>
                     </div>
                 </div>
             </div>
@@ -164,16 +263,19 @@ export default function PostEditor(props: PostEditorProps) {
                     </div>
                 </div>
             </div>
-            <button className="
-                w-14 h-14 p-1 aspect-square rounded-full bg-main-white text-main-white absolute
-                left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 hover:cursor-pointer
-            "
-            onClick={() => setOpen(!open)}
-            >
-                <div className="w-full h-full rounded-full bg-main-black flex items-center justify-center">
-                    <p className={open ? 'text-2xl font-bold line -translate-y-0.5 translate-x-0.5 rotate-45' : 'text-2xl font-bold line -translate-y-0.5'}>+</p>
-                </div>
-            </button>
+            {
+                props.mode !== 'reply' &&
+                <button className="
+                        w-14 h-14 p-1 aspect-square rounded-full bg-main-white text-main-white absolute
+                        left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 hover:cursor-pointer
+                    "
+                    onClick={() => setOpen(!open)}
+                >
+                    <div className="w-full h-full rounded-full bg-main-black flex items-center justify-center">
+                            <p className={open ? 'text-2xl font-bold line -translate-y-0.5 translate-x-0.5 rotate-45' : 'text-2xl font-bold line -translate-y-0.5'}>+</p>
+                    </div>
+                </button>
+            }
         </div>
     );
 }

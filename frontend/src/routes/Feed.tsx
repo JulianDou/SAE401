@@ -1,6 +1,7 @@
 import { fetchPosts, getUserData, fetchFollowedPosts } from "../data/loaders"
 import { useLoaderData, useLocation } from "react-router-dom"
 import { useState } from "react"
+import { server_url } from "../data/loaders"
 
 import Post from "../components/Post"
 import PostEditor from "../components/PostEditor"
@@ -60,6 +61,11 @@ export default function Feed() {
             <div className="self-stretch w-full h-full flex-grow relative overflow-y-auto">
                 <div className="absolute w-full flex-auto flex flex-col gap-8 py-2.5 px-5 md:px-[25%] items-center">
                     {
+                        data.posts.length === 0 ? (
+                            <div className="w-full h-full flex items-center justify-center">
+                                <h1 className="text-main-slate text-center">Nothing to see here... Looks like nobody's posted yet</h1>
+                            </div>
+                        ) :
                         data.posts.map((post: any) => (
                             <Post
                                 key={post.id}
@@ -68,11 +74,16 @@ export default function Feed() {
                                 time={post.time}
                                 author={{
                                     id: post.author.id,
-                                    username: post.author.username
+                                    username: post.author.username,
+                                    avatar: post.author.avatar ? server_url + post.author.avatar : "/placeholders/defaultpfp.png"
                                 }}
                                 image={post.image}
                                 likes={post.likes}
                                 belongsToUser={post.belongs_to_user}
+                                userBlockedByAuthor={post.user_blocked_by_author}
+                                replyCount={post.reply_count}
+                                media={post.media}
+                                isCensored={post.is_censored}
                             />
                         ))
                     }

@@ -16,7 +16,7 @@ interface Modification {
     value: string;
 }
 
-export default function User(props: UserProps) {
+export default function UserAdminEdit(props: UserProps) {
     const [initialValues, setInitialValues] = useState({
         username: props.username,
         email: props.email,
@@ -161,12 +161,12 @@ export default function User(props: UserProps) {
                         </p>
                     </div>
                     <div className="flex flex-col gap-2.5 order-3">
-                    <input
-                            type="text"
-                            name="email"
-                            onChange={handleChange}
-                            style={{ width: `${email.length + 1}ch` }}
-                            value={email}
+                        <input
+                                type="text"
+                                name="email"
+                                onChange={handleChange}
+                                style={{ width: `${email.length + 1}ch` }}
+                                value={email}
                         />
                         <div className="flex gap-2.5">
                             <div className="flex gap-2.5 after:content-[''] after:w-[1px] after:h-full after:bg-main-grey">

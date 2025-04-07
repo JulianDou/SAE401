@@ -29,6 +29,20 @@ class PostRepository extends ServiceEntityRepository
         return new Paginator($query);
     }
 
+    public function findAllLatestFiltered($offset, $count, $blockedAuthors): Paginator
+    {
+        $query = $this->createQueryBuilder('p')
+            ->orderBy('p.time', 'DESC')
+            ->andWhere('p.author NOT IN (:blockedAuthors)')
+            ->setParameter('blockedAuthors', $blockedAuthors)
+            ->setFirstResult($offset)
+            ->setMaxResults($count)
+            ->getQuery()
+        ;
+
+        return new Paginator($query);
+    }
+
 //    /**
 //     * @return Post[] Returns an array of Post objects
 //     */

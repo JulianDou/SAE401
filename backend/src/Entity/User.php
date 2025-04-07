@@ -14,17 +14,18 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
+
 #[UniqueEntity(fields: ['username'], message: 'There is already an account with this username')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['post:read'])]
+    #[Groups(['post:read', 'reply:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['post:read'])]
+    #[Groups(['post:read', 'reply:read'])]
     private ?string $username = null;
 
     /**
@@ -61,6 +62,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, self>
      */
     #[ORM\ManyToMany(targetEntity: self::class, inversedBy: 'followers')]
+    #[ORM\JoinTable(name: 'user_follows')]
+    #[ORM\JoinColumn(name: 'follower_id', referencedColumnName: 'id')]
+    #[ORM\InverseJoinColumn(name: 'followedUser_id', referencedColumnName: 'id')]
     private Collection $follows;
 
     /**
@@ -75,12 +79,47 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Post::class, mappedBy: 'likes')]
     private Collection $likedPosts;
 
+    /**
+     * @var Collection<int, self>
+     */
+    #[ORM\ManyToMany(targetEntity: self::class, inversedBy: 'blockedBy')]
+    #[ORM\JoinTable(name: 'user_blocks')]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id')]
+    #[ORM\InverseJoinColumn(name: 'blockedUser_id', referencedColumnName: 'id')]
+    private Collection $blockedUsers;
+
+    /**
+     * @var Collection<int, self>
+     */
+    #[ORM\ManyToMany(targetEntity: self::class, mappedBy: 'blockedUsers')]
+    private Collection $blockedBy;
+
+    /**
+     * @var Collection<int, Reply>
+     */
+    #[ORM\OneToMany(targetEntity: Reply::class, mappedBy: 'author')]
+    private Collection $replies;
+
+    /**
+     * @var Collection<int, Reply>
+     */
+    #[ORM\ManyToMany(targetEntity: Reply::class, mappedBy: 'likes')]
+    private Collection $likedReplies;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['post:read', 'reply:read'])]
+    private ?string $avatar = null;
+
     public function __construct()
     {
         $this->posts = new ArrayCollection();
         $this->follows = new ArrayCollection();
         $this->followers = new ArrayCollection();
         $this->likedPosts = new ArrayCollection();
+        $this->blockedUsers = new ArrayCollection();
+        $this->blockedBy = new ArrayCollection();
+        $this->replies = new ArrayCollection();
+        $this->likedReplies = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -322,6 +361,126 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         if ($this->likedPosts->removeElement($likedPost)) {
             $likedPost->removeLike($this);
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, self>
+     */
+    public function getBlockedUsers(): Collection
+    {
+        return $this->blockedUsers;
+    }
+
+    public function addBlockedUser(self $blockedUser): static
+    {
+        if (!$this->blockedUsers->contains($blockedUser)) {
+            $this->blockedUsers->add($blockedUser);
+        }
+
+        return $this;
+    }
+
+    public function removeBlockedUser(self $blockedUser): static
+    {
+        $this->blockedUsers->removeElement($blockedUser);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, self>
+     */
+    public function getBlockedBy(): Collection
+    {
+        return $this->blockedBy;
+    }
+
+    public function addBlockedBy(self $blockedBy): static
+    {
+        if (!$this->blockedBy->contains($blockedBy)) {
+            $this->blockedBy->add($blockedBy);
+            $blockedBy->addBlockedUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBlockedBy(self $blockedBy): static
+    {
+        if ($this->blockedBy->removeElement($blockedBy)) {
+            $blockedBy->removeBlockedUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reply>
+     */
+    public function getReplies(): Collection
+    {
+        return $this->replies;
+    }
+
+    public function addReply(Reply $reply): static
+    {
+        if (!$this->replies->contains($reply)) {
+            $this->replies->add($reply);
+            $reply->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReply(Reply $reply): static
+    {
+        if ($this->replies->removeElement($reply)) {
+            // set the owning side to null (unless already changed)
+            if ($reply->getAuthor() === $this) {
+                $reply->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reply>
+     */
+    public function getLikedReplies(): Collection
+    {
+        return $this->likedReplies;
+    }
+
+    public function addLikedReply(Reply $likedReply): static
+    {
+        if (!$this->likedReplies->contains($likedReply)) {
+            $this->likedReplies->add($likedReply);
+            $likedReply->addLike($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLikedReply(Reply $likedReply): static
+    {
+        if ($this->likedReplies->removeElement($likedReply)) {
+            $likedReply->removeLike($this);
+        }
+
+        return $this;
+    }
+
+    public function getAvatar(): ?string
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar(?string $avatar): static
+    {
+        $this->avatar = $avatar;
 
         return $this;
     }

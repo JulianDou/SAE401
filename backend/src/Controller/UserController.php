@@ -36,6 +36,7 @@ class UserController extends AbstractController
             'id' => $user->getId(),
             'username' => $user->getUsername(),
             'email' => $user->getEmail(),
+            'avatar' => $user->getAvatar(),
         ];
         return $this->json($user_safe);
     }
@@ -67,6 +68,7 @@ class UserController extends AbstractController
                 'verified' => $user->isVerified(),
                 'admin' => $user->getIsAdmin(),
                 'banned' => $user->isBanned(),
+                'avatar' => $user->getAvatar(),
             ];
         }
         return $this->json($users_safe);
@@ -173,8 +175,63 @@ class UserController extends AbstractController
                 'verified' => $userToUpdate->isVerified(),
                 'admin' => $userToUpdate->getIsAdmin(),
                 'banned' => $userToUpdate->isBanned(),
+                'avatar' => $userToUpdate->getAvatar(),
             ]
         ], 200);
+    }
+
+    #[Route('/api/user/{id}/upload/avatar', methods: ['POST'], format: 'json')]
+    public function updateUserAvatar(
+        int $id, 
+        Request $request, 
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager,
+    ): JsonResponse {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Invalid token'], 401);
+        }
+
+        if ($user && !($user->getIsAdmin() || $user->getId() === $id)) {
+            return new JsonResponse(['message' => 'Access denied. You must be an administrator or own this account to proceed'], 403);
+        }
+
+        // Check if the user exists
+        $userToUpdate = $userRepository->find($id);
+        if (!$userToUpdate) {
+            return new JsonResponse(['message' => 'User not found'], 404);
+        }
+
+        // Check if the request contains a file
+        if (!$request->files->has('avatar')) {
+            return new JsonResponse(['message' => 'No file uploaded'], 400);
+        }
+
+        // Get the uploaded file
+        $file = $request->files->get('avatar');
+
+        // Validate the file type (optional)
+        if (!in_array($file->getClientOriginalExtension(), ['jpg', 'jpeg', 'png'])) {
+            return new JsonResponse(['message' => 'Invalid file type. Only JPG and PNG are allowed.'], 400);
+        }
+
+        // Move the file to the desired directory
+        $filePath = 'uploads/avatars/' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $file->move('uploads/avatars/', $filePath);
+
+        // Update the user's avatar path
+        $userToUpdate->setAvatar($filePath);
+
+        // Save changes to the database
+        $entityManager->persist($userToUpdate);
+        $entityManager->flush();
+
+        return new JsonResponse(['message' => 'Avatar updated successfully', 'avatar' => $userToUpdate->getAvatar()], 200);
     }
 
     #[Route('/api/profile/{username}/posts', methods: ['GET'], format: 'json')]
@@ -406,7 +463,7 @@ class UserController extends AbstractController
             $isFollowing = false;
         }
 
-        // Check if the user is blocked by the target user        
+        // Check if the user is blocked by the target user 
         $blockedClient = $targetUser->getBlockedUsers();
         $blockedClient = $blockedClient->toArray();
         if (in_array($user, $blockedClient)) {
@@ -433,6 +490,7 @@ class UserController extends AbstractController
             $blockedUsers_safe[] = [
                 'id' => $user_in_list->getId(),
                 'username' => $user_in_list->getUsername(),
+                'avatar' => $user_in_list->getAvatar(),
             ];
         }
 
@@ -446,12 +504,13 @@ class UserController extends AbstractController
                 'isBlocked' => $isBlocked,
                 'belongsToUser' => $user->getId() === $targetUser->getId(),
                 'blockedUsers' => $blockedUsers_safe,
+                'avatar' => $targetUser->getAvatar(),
             ];
         }
         else {
             $user_safe = [
                 'id' => $targetUser->getId(),
-                'username' => $targetUser->getUsername(),
+                'username' => $targetUser->getUsername(),                
                 'email' => 'This user has been banned.',
             ];
         }

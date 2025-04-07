@@ -1,4 +1,5 @@
 const api_url = "https://animated-journey-6996xj7957973rg74-8080.app.github.dev/api/";
+const server_url = "https://animated-journey-6996xj7957973rg74-8080.app.github.dev/";
 
 const token = localStorage.getItem("auth_token");
 
@@ -124,3 +125,4 @@ export async function fetchAdmin(){
 }    
 
 export { api_url };
+export { server_url };

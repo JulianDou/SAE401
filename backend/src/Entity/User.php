@@ -106,6 +106,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Reply::class, mappedBy: 'likes')]
     private Collection $likedReplies;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['post:read', 'reply:read'])]
+    private ?string $avatar = null;
+
     public function __construct()
     {
         $this->posts = new ArrayCollection();
@@ -465,6 +469,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         if ($this->likedReplies->removeElement($likedReply)) {
             $likedReply->removeLike($this);
         }
+
+        return $this;
+    }
+
+    public function getAvatar(): ?string
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar(?string $avatar): static
+    {
+        $this->avatar = $avatar;
 
         return $this;
     }

@@ -12,6 +12,7 @@ export default function UserEdit() {
     const navigate = useNavigate();
     const [username, setUsername] = useState(data.username);
     const [email, setEmail] = useState(data.email);
+    const [avatar, setAvatar] = useState(data.avatar);
     const [error, setError] = useState('');
     const [messageColor, setMessageColor] = useState('');
     const [modifications, setModifications] = useState<Modification[]>([]);
@@ -90,6 +91,62 @@ export default function UserEdit() {
     
     };
 
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const token = localStorage.getItem("auth_token");
+
+        const file = e.target.files?.[0];
+        if (!file) {
+            setMessageColor('red');
+            setError('No file selected.');
+            return;
+        }
+
+        const validExtensions = ['jpg', 'jpeg', 'png'];
+        const fileExtension = file.name.split('.').pop()?.toLowerCase();
+        if (!fileExtension || !validExtensions.includes(fileExtension)) {
+            setMessageColor('red');
+            setError('Invalid file type. Only JPG and PNG are allowed.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        fetch (api_url + "user/" + data.id + "/upload/avatar", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Authorization": `${token}`
+            },
+            body: formData,
+        })
+        .then((response) => {
+            const res = response.json();
+            if (!response.ok) {
+                return res.then((err) => {
+                    throw new Error(err.message || "An error occurred...");
+                });
+            }
+            res.then((data) => {
+                if (data.message === undefined) {
+                    setMessageColor('red');
+                    setError("An unexpected error occurred...");
+                    return;
+                }
+                else {
+                    setMessageColor('black');
+                    setError(data.message);
+                    setAvatar(data.avatar);
+                    return;
+                }
+            })
+        })
+        .catch((error) => {
+            setMessageColor('red');
+            setError(error.message);
+        });
+    }
+
     if (!data.belongsToUser){
         return (
             <div className="w-full h-full flex flex-col gap-2.5 items-center justify-center">
@@ -104,8 +161,33 @@ export default function UserEdit() {
             <div className="
                 absolute w-full flex-auto flex flex-col gap-2.5 py-2.5 px-5 md:px-[25%] items-center
             ">
-                <div className="w-36 h-36 rounded-full bg-main-slate -order-2">
-                    <img src="/placeholders/defaultpfp.png" alt="Profile Picture" className="w-full h-full object-cover rounded-full" />
+                <div className="flex flex-col gap-0.5 -order-2 items-center">
+                    <div className="relative w-36">
+                        <div className="w-36 h-36 rounded-full bg-main-slate">
+                            <img src={avatar} alt="Profile Picture" className="w-full h-full object-cover rounded-full" />
+                        </div>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            id="avatar-upload"
+                            style={{ display: 'none' }}
+                            onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                    handleAvatarChange(e);
+                                }
+                            }}
+                        />
+                        <label htmlFor="avatar-upload">
+                            <img
+                                src="/assets/icons/edit_false.svg"
+                                alt="Edit Avatar"
+                                className="absolute bottom-0.5 right-0.5 p-1 bg-main-white border-2 rounded border-mai-black hover:cursor-pointer"
+                            />
+                        </label>
+                    </div>
+                    <p className="text-sm text-main-grey">
+                        Avatar changes are automatically saved.
+                    </p>
                 </div>
                 <input
                     type="text"

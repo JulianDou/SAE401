@@ -13,6 +13,7 @@ interface PostProps {
     author: {
         id: number;
         username: string;
+        avatar?: string;
     }
     image?: string;
     likes: [
@@ -212,7 +213,7 @@ export default function Post(props: PostProps) {
 
     return (
         <div className={`${deleted ? 'hidden' : ''} relative flex gap-3 w-full`}>
-            <ProfilePic username={props.author.username} id={props.author.id} size={3}/>
+            <ProfilePic username={props.author.username} id={props.author.id} image={props.author.avatar} size={3}/>
             <div className="flex flex-col gap-2.5 flex-auto">
                 <div className="flex md:justify-between flex-col md:flex-row">
                     <Username username={props.author.username} id={props.author.id} />

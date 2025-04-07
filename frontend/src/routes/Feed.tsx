@@ -1,6 +1,7 @@
 import { fetchPosts, getUserData, fetchFollowedPosts } from "../data/loaders"
 import { useLoaderData, useLocation } from "react-router-dom"
 import { useState } from "react"
+import { server_url } from "../data/loaders"
 
 import Post from "../components/Post"
 import PostEditor from "../components/PostEditor"
@@ -73,7 +74,8 @@ export default function Feed() {
                                 time={post.time}
                                 author={{
                                     id: post.author.id,
-                                    username: post.author.username
+                                    username: post.author.username,
+                                    avatar: post.author.avatar ? server_url + post.author.avatar : "/placeholders/defaultpfp.png"
                                 }}
                                 image={post.image}
                                 likes={post.likes}

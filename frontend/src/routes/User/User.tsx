@@ -3,6 +3,7 @@ import { getUserProfilePosts, getUserProfile } from "../../data/loaders"
 import { useState } from "react"
 import Post from "../../components/Post"
 import { api_url } from "../../data/loaders";
+import { server_url } from "../../data/loaders";
 import ProfilePic from "../../ui/ProfilePic";
 import Username from "../../ui/Username";
 
@@ -28,7 +29,8 @@ export async function loader({params}: {params: Params<string>}) {
         belongsToUser: userData.belongsToUser,
         blockedUser: userData.blockedUser,
         isBlocked: userData.isBlocked,
-        blockedUsers: userData.blockedUsers
+        blockedUsers: userData.blockedUsers,
+        avatar: server_url + userData.avatar || '/placeholders/defaultpfp.png'
     }
     return data;
 }
@@ -203,7 +205,7 @@ export default function User() {
                 after:content-[''] after:w-full after:h-[1px] after:bg-main-grey after:-order-1
             ">
                 <div className="w-36 h-36 rounded-full bg-main-slate -order-2">
-                    <img src="/placeholders/defaultpfp.png" alt="Profile Picture" className="w-full h-full object-cover rounded-full" />
+                    <img src={data.avatar} alt="Profile Picture" className="w-full h-full object-cover rounded-full" />
                 </div>
                 <p className="text-2xl font-bold -order-2">{data.username}</p>
                 <p className="text-lg text-main-slate -order-2">{data.email}</p>

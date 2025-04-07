@@ -30,7 +30,7 @@ export async function loader({params}: {params: Params<string>}) {
         blockedUser: userData.blockedUser,
         isBlocked: userData.isBlocked,
         blockedUsers: userData.blockedUsers,
-        avatar: server_url + userData.avatar || '/placeholders/defaultpfp.png'
+        avatar: userData.avatar ? server_url + userData.avatar : '/placeholders/defaultpfp.png'
     }
     return data;
 }

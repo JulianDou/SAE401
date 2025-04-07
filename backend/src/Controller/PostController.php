@@ -65,6 +65,13 @@ class PostController extends AbstractController
                 $post->setUserBlockedByAuthor(true);
                 // Again, data NOT flushed on purpose to avoid changes being saved to database
             }
+            if ($post->isCensored()){
+                $post->setText('This post has been censored by moderation.');
+                if ($post->getMedia() !== null) {
+                    $post->setMedia('/placeholders/censored.jpg');
+                }
+                // Data not flushed... etc.
+            }
         }
         
         $previousPage = $page > 1 ? $page - 1 : null;
@@ -151,6 +158,16 @@ class PostController extends AbstractController
         foreach ($followedUsers as $followedUser) {
             $posts = $postRepository->findBy(['author' => $followedUser]);
             $followedPosts = array_merge($followedPosts, $posts);
+        }
+
+        foreach ($followedPosts as $post){
+            if ($post->getAuthor()->isBanned()){ // Check if author is banned
+                $post->setText('This user has been banned. As such, their posts are no longer visible.');
+            }
+            if ($post->isCensored()){
+                $post->setText('This post has been censored. As such, it is no longer visible.');
+                $post->setMedia('censored');
+            }
         }
 
         $serializedPosts = $serializer->serialize($followedPosts, 'json', [

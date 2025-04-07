@@ -27,6 +27,7 @@ interface PostProps {
     replyCount?: number;
     isReply?: boolean;
     media?: string;
+    isCensored?: boolean;
 }
 
 export default function Post(props: PostProps) {
@@ -244,50 +245,53 @@ export default function Post(props: PostProps) {
                         <Image src={props.media} alt={props.author.username + "'s post's image"} maxHeight={500}/>
                     )
                 ) : null}
-                <div className="flex flex-row-reverse gap-2 justify-start items-center">
+                {
+                    !props.isCensored &&
+                    <div className="flex flex-row-reverse gap-2 justify-start items-center">
 
-                    <Likes 
-                        postId={props.id} 
-                        count={props.likes.length} 
-                        liked={props.likes.some((like) => like.id === parseInt(userid ? userid : "0", 10))}
-                        blocked={props.userBlockedByAuthor}
-                        isReply={props.isReply}
-                    />
-                    
-                    { // Icone suppression
-                        props.belongsToUser && 
-                        <img 
-                            onClick={() => setDeleting(true)}
-                            className="hover:cursor-pointer"
-                            src="/assets/icons/delete.svg" alt="delete" 
+                        <Likes 
+                            postId={props.id} 
+                            count={props.likes.length} 
+                            liked={props.likes.some((like) => like.id === parseInt(userid ? userid : "0", 10))}
+                            blocked={props.userBlockedByAuthor}
+                            isReply={props.isReply}
                         />
-                    }
+                        
+                        { // Icone suppression
+                            props.belongsToUser && 
+                            <img 
+                                onClick={() => setDeleting(true)}
+                                className="hover:cursor-pointer"
+                                src="/assets/icons/delete.svg" alt="delete" 
+                            />
+                        }
 
-                    { // Icone edition
-                        props.belongsToUser && 
-                        <img 
-                            onClick={() => setEditing(!editing)}
-                            className="hover:cursor-pointer"
-                            src={"/assets/icons/edit_" + editing + ".svg"}
-                            alt="edit"
-                        />
-                    }
+                        { // Icone edition
+                            props.belongsToUser && 
+                            <img 
+                                onClick={() => setEditing(!editing)}
+                                className="hover:cursor-pointer"
+                                src={"/assets/icons/edit_" + editing + ".svg"}
+                                alt="edit"
+                            />
+                        }
 
-                    { // Icone reponse
-                        !props.userBlockedByAuthor && !props.isReply &&
-                        <img
-                            className="hover:cursor-pointer"
-                            onClick={() => setReplying(!replying)}
-                            src={"/assets/icons/reply_" + replying + ".svg"}
-                            alt="reply"
-                        />
-                    }
+                        { // Icone reponse
+                            !props.userBlockedByAuthor && !props.isReply &&
+                            <img
+                                className="hover:cursor-pointer"
+                                onClick={() => setReplying(!replying)}
+                                src={"/assets/icons/reply_" + replying + ".svg"}
+                                alt="reply"
+                            />
+                        }
 
-                    { // Bouton validation édition
-                        editing &&
-                        <button onClick={handleEdit} className="flex h-fit justify-center p-2.5 rounded-4xl bg-main-black text-white hover:cursor-pointer">Save edits</button>
-                    }
-                </div>
+                        { // Bouton validation édition
+                            editing &&
+                            <button onClick={handleEdit} className="flex h-fit justify-center p-2.5 rounded-4xl bg-main-black text-white hover:cursor-pointer">Save edits</button>
+                        }
+                    </div>
+                }
 
                 {
                     replying && !props.isReply &&
@@ -295,7 +299,7 @@ export default function Post(props: PostProps) {
                 }
 
                 {
-                    props.replyCount &&
+                    props.replyCount && !props.isCensored &&
                     <div className="flex gap-2.5">
                         <p 
                         onClick={handleReplies}
@@ -317,7 +321,7 @@ export default function Post(props: PostProps) {
                 }
 
                 {
-                    repliesOpen && replies.length > 0 &&
+                    repliesOpen && replies.length > 0 && !props.isCensored &&
                     <div className="flex flex-col gap-2.5">
                         {replies.map((reply) => (
                             <Post 

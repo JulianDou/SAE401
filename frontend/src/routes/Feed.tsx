@@ -83,6 +83,7 @@ export default function Feed() {
                                 userBlockedByAuthor={post.user_blocked_by_author}
                                 replyCount={post.reply_count}
                                 media={post.media}
+                                isCensored={post.is_censored}
                             />
                         ))
                     }

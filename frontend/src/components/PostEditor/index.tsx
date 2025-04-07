@@ -187,7 +187,7 @@ export default function PostEditor(props: PostEditorProps) {
                 open ? 
                     props.mode === 'reply' ?
                         'visible'
-                        : 'visible mb-64 md:min-w-96'
+                        : 'visible md:min-w-96'
                     : 'hidden'
                 }`
             }>

@@ -4,7 +4,6 @@ import Username from "../../ui/Username";
 import Likes from "../../ui/Likes/Index";
 import { useState, useRef } from "react";
 import { api_url } from "../../data/loaders";
-import { server_url } from "../../data/loaders";
 import PostEditor from "../PostEditor";
 
 interface PostProps {

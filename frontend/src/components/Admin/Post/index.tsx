@@ -2,7 +2,6 @@ import ProfilePic from "../../../ui/ProfilePic";
 import Username from "../../../ui/Username";
 import Image from "../../../ui/Image";
 import { api_url } from '../../../data/loaders';
-import { server_url } from "../../../data/loaders";
 import { useState } from "react";
 
 interface PostProps {

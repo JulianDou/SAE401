@@ -1,5 +1,5 @@
 const api_url = import.meta.env.VITE_API_URL + "api/";
-const server_url = import.meta.env.VITE_SERVER_URL;
+const server_url = import.meta.env.VITE_API_URL;
 
 const token = localStorage.getItem("auth_token");
 

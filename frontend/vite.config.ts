@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-    base: "/~doutreligne1/SAE401/frontend/dist/",
+    base: "/~doutreligne1/SAE401/Cycle_C/frontend/dist/",
     plugins: [
         react(),
         tailwindcss(),

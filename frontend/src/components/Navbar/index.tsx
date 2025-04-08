@@ -9,11 +9,13 @@ export default function Navbar() {
 
     useEffect(() => {
         const path = location.pathname;
-        if (path === import.meta.env.BASE_URL) {
+        const base = import.meta.env.BASE_URL;
+
+        if (path === base) {
             setActiveIcon("home");
-        } else if (path.startsWith("/login") || path.startsWith("/user")) {
+        } else if (path.startsWith(`${base}login`) || path.startsWith(`${base}user`)) {
             setActiveIcon("profile");
-        } else if (path === "/foryou") {
+        } else if (path === `${base}foryou`) {
             setActiveIcon("followed");
         }
     }, [location]);

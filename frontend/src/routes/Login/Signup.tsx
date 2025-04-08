@@ -33,11 +33,11 @@ export default function Signup() {
                     throw new Error(err.message || "An error occurred...");
                 });
             }
-            navigate("/login");
+            navigate(import.meta.env.BASE_URL + "login");
         })
         .then(() => {
             setError(null);
-            navigate("/");
+            navigate(import.meta.env.BASE_URL + "login");
         })
         .catch((error) => {
             setError(error.message);

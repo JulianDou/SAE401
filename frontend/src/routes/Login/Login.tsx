@@ -5,7 +5,7 @@ import { api_url } from "../../data/loaders";
 
 export default function Login() {
     const location = useLocation();
-    const isAdmin = location.pathname.startsWith("/admin");
+    const isAdmin = location.pathname.startsWith(`${import.meta.env.BASE_URL}admin`);
     const [error, setError] = useState<string | null>(null);
     const [isFormValid, setIsFormValid] = useState(false); // État pour la validité du formulaire
     const navigate = useNavigate();
@@ -51,7 +51,7 @@ export default function Login() {
         })
         .then(() => {
             setError(null);
-            navigate("/");
+            navigate(import.meta.env.BASE_URL);
         })
         .catch((error) => {
             setError(error.message);

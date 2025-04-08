@@ -6,6 +6,7 @@ interface UserProps {
     id: number;
     username: string;
     email: string;
+    avatar?: string;
     verified: boolean;
     admin: boolean;
     banned: boolean;
@@ -20,6 +21,7 @@ export default function UserAdminEdit(props: UserProps) {
     const [initialValues, setInitialValues] = useState({
         username: props.username,
         email: props.email,
+        avatar: props.avatar,
         verified: props.verified,
         admin: props.admin,
         banned: props.banned
@@ -68,6 +70,7 @@ export default function UserAdminEdit(props: UserProps) {
                         username: data.user.username,
                         email: data.user.email,
                         verified: data.user.verified,
+                        avatar: data.user.avatar,
                         admin: data.user.admin,
                         banned: data.user.banned
                     });
@@ -144,7 +147,8 @@ export default function UserAdminEdit(props: UserProps) {
             ${saveButton ? 'mb-10 md:mb-0' : 'mb-0'}
         `}>
             <div className="w-full flex flex-col md:flex-row md:items-center gap-2.5">
-                <ProfilePic id={props.id} username={initialValues.username} size={4} />
+                <ProfilePic id={props.id} username={initialValues.username} size={4} 
+                image={initialValues.avatar ? (import.meta.env.VITE_API_URL + initialValues.avatar) : (import.meta.env.BASE_URL + 'placeholders/defaultpfp.png')}/>
                 <div className="w-full flex flex-col md:flex-row p-2.5 gap-2.5 after:content-[''] after:w-full after:md:w-[1px] after:h-[1px] after:md:h-full after:bg-main-grey after:order-1">
                     <div className="flex flex-col gap-2.5 order-0 items">
                         <input

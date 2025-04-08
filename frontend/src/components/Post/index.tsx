@@ -263,7 +263,7 @@ export default function Post(props: PostProps) {
                             <img 
                                 onClick={() => setDeleting(true)}
                                 className="hover:cursor-pointer"
-                                src="/assets/icons/delete.svg" alt="delete" 
+                                src={import.meta.env.BASE_URL + "assets/icons/delete.svg"} alt="delete" 
                             />
                         }
 
@@ -272,7 +272,7 @@ export default function Post(props: PostProps) {
                             <img 
                                 onClick={() => setEditing(!editing)}
                                 className="hover:cursor-pointer"
-                                src={"/assets/icons/edit_" + editing + ".svg"}
+                                src={import.meta.env.BASE_URL + "assets/icons/edit_" + editing + ".svg"}
                                 alt="edit"
                             />
                         }
@@ -282,7 +282,7 @@ export default function Post(props: PostProps) {
                             <img
                                 className="hover:cursor-pointer"
                                 onClick={() => setReplying(!replying)}
-                                src={"/assets/icons/reply_" + replying + ".svg"}
+                                src={import.meta.env.BASE_URL + "assets/icons/reply_" + replying + ".svg"}
                                 alt="reply"
                             />
                         }
@@ -334,7 +334,7 @@ export default function Post(props: PostProps) {
                                     {
                                         id: reply.author.id,
                                         username: reply.author.username,
-                                        avatar: reply.author.avatar ? server_url + reply.author.avatar : undefined
+                                        avatar: reply.author.avatar ? (import.meta.env.VITE_API_URL + reply.author.avatar) : undefined
                                     }
                                 }
                                 image={reply.image}

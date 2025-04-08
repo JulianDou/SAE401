@@ -3,7 +3,6 @@ import { getUserProfilePosts, getUserProfile } from "../../data/loaders"
 import { useState } from "react"
 import Post from "../../components/Post"
 import { api_url } from "../../data/loaders";
-import { server_url } from "../../data/loaders";
 import ProfilePic from "../../ui/ProfilePic";
 import Username from "../../ui/Username";
 
@@ -30,7 +29,7 @@ export async function loader({params}: {params: Params<string>}) {
         blockedUser: userData.blockedUser,
         isBlocked: userData.isBlocked,
         blockedUsers: userData.blockedUsers,
-        avatar: userData.avatar ? server_url + userData.avatar : '/placeholders/defaultpfp.png'
+        avatar: userData.avatar ? (import.meta.env.VITE_API_URL + userData.avatar) : (import.meta.env.BASE_URL + 'placeholders/defaultpfp.png')
     }
     return data;
 }
@@ -205,7 +204,10 @@ export default function User() {
                 after:content-[''] after:w-full after:h-[1px] after:bg-main-grey after:-order-1
             ">
                 <div className="w-36 h-36 rounded-full bg-main-slate -order-2">
-                    <img src={data.avatar} alt="Profile Picture" className="w-full h-full object-cover rounded-full" />
+                    <img 
+                        src={data.avatar} 
+                        alt="Profile Picture" className="w-full h-full object-cover rounded-full" 
+                    />
                 </div>
                 <p className="text-2xl font-bold -order-2">{data.username}</p>
                 <p className="text-lg text-main-slate -order-2">{data.email}</p>
@@ -280,7 +282,8 @@ export default function User() {
                                     time={post.time}
                                     author={{
                                         id: post.author.id,
-                                        username: post.author.username
+                                        username: post.author.username,
+                                        avatar: post.author.avatar ? (import.meta.env.VITE_API_URL + post.author.avatar) : (import.meta.env.BASE_URL + "placeholders/defaultpfp.png")
                                     }}
                                     image={post.image}
                                     likes={post.likes}
@@ -304,7 +307,10 @@ export default function User() {
                             ) :
                             data.blockedUsers.map((user: any) => (
                                 <div key={user.id} className="flex items-center gap-2.5">
-                                    <ProfilePic id={user.id} username={user.username} size={2} />
+                                    <ProfilePic id={user.id} username={user.username} 
+                                        image={user.avatar ? (import.meta.env.VITE_API_URL + user.avatar) : (import.meta.env.BASE_URL + "placeholders/defaultpfp.png")} 
+                                        size={2} 
+                                    />
                                     <Username id={user.id} username={user.username} />
                                 </div>
                             ))

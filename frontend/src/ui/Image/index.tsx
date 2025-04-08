@@ -7,7 +7,6 @@ interface ImageProps {
 }
 
 export default function Image(props: ImageProps) {
-    const serverUrl = "https://animated-journey-6996xj7957973rg74-8080.app.github.dev";
 
     return (
         <div 
@@ -17,12 +16,12 @@ export default function Image(props: ImageProps) {
             }}         
         >
             <img 
-                src={serverUrl + props.src} 
+                src={import.meta.env.VITE_API_URL + props.src} 
                 alt={props.alt} 
                 className='absolute -z-50 w-full h-full object-cover blur-lg brightness-75'
             />
             <img 
-                src={serverUrl + props.src} 
+                src={import.meta.env.VITE_API_URL + props.src} 
                 alt={props.alt} 
                 className='relative h-full object-contain shadow-2xl'
             />

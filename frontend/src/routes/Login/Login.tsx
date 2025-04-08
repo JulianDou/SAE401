@@ -67,7 +67,7 @@ export default function Login() {
     return (
         <>
             <div className="flex flex-col items-center justify-center w-full h-full gap-10">
-                <img src="/assets/Logo.png" alt="Logo"></img>
+                <img src={import.meta.env.BASE_URL + "assets/Logo.png"} alt="Logo"></img>
                 <p className={error ? "text-main-red" : "hidden"}>{error}</p>
                 <form 
                     method="post" 

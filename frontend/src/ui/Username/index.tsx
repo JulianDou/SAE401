@@ -7,6 +7,6 @@ interface UsernameProps {
 
 export default function Username(props: UsernameProps) {
     return (
-        <Link to={"/user/" + props.username} data-userid={props.id} className="font-bold w-min hover:cursor-pointer">{props.username}</Link>
+        <Link to={import.meta.env.BASE_URL + "user/" + props.username} data-userid={props.id} className="font-bold w-min hover:cursor-pointer">{props.username}</Link>
     );
 }

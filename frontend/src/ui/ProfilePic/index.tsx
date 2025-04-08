@@ -7,10 +7,10 @@ interface ProfilePicProps {
     username: string;
 }
 
-export default function ProfilePic({ size, image='/placeholders/defaultpfp.png', id, username }: ProfilePicProps) {
+export default function ProfilePic({ size, image=(import.meta.env.BASE_URL + 'placeholders/defaultpfp.png'), id, username }: ProfilePicProps) {
 
     return (
-        <Link to={"/user/" + username} data-userid={id} style={
+        <Link to={import.meta.env.BASE_URL + "user/" + username} data-userid={id} style={
             {
                 width: `${size}rem`,
                 aspectRatio: '1/1',

@@ -1,9 +1,9 @@
-const api_url = "https://animated-journey-6996xj7957973rg74-8080.app.github.dev/api/";
-const server_url = "https://animated-journey-6996xj7957973rg74-8080.app.github.dev/";
+const api_url = import.meta.env.VITE_API_URL + "api/";
+const server_url = import.meta.env.VITE_SERVER_URL;
 
 const token = localStorage.getItem("auth_token");
 
-export async function fetchPosts(){    
+export async function fetchPosts(){
     const res = await fetch(api_url + "posts", {
         method: "GET",
         credentials: "include",
@@ -13,7 +13,7 @@ export async function fetchPosts(){
     });
 
     if (res.status === 401) {
-        window.location.href = "/login";
+        window.location.href = import.meta.env.BASE_URL + "login";
         return [];
     }
 
@@ -32,7 +32,7 @@ export async function fetchFollowedPosts(){
     });
 
     if (res.status === 401) {
-        window.location.href = "/login";
+        window.location.href = import.meta.env.BASE_URL + "login";
         return [];
     }
 
@@ -49,7 +49,7 @@ export async function getUserData(id: number){
     });
 
     if (res.status === 401) {
-        window.location.href = "/login";
+        window.location.href = import.meta.env.BASE_URL + "login";
         return {};
     }
 
@@ -66,7 +66,7 @@ export async function getUserProfile(username: string){
     });
 
     if (res.status === 401) {
-        window.location.href = "/login";
+        window.location.href = import.meta.env.BASE_URL + "login";
         return [];
     }
 
@@ -83,7 +83,7 @@ export async function getUserProfilePosts(username: string){
     });
 
     if (res.status === 401) {
-        window.location.href = "/login";
+        window.location.href = import.meta.env.BASE_URL + "login";
         return [];
     }
 
@@ -100,7 +100,7 @@ export async function fetchUsers(){
     });
 
     if (res.status === 401) {
-        window.location.href = "/login";
+        window.location.href = import.meta.env.BASE_URL + "login";
         return [];
     }
 
@@ -117,7 +117,7 @@ export async function fetchAdmin(){
     });
 
     if (res.status === 401) {
-        window.location.href = "/login";
+        window.location.href = import.meta.env.BASE_URL + "login";
         return {};
     }
 

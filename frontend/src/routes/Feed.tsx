@@ -39,7 +39,7 @@ export default function Feed() {
 
     async function refresh() {
         const path = location.pathname;
-        if (path === "/foryou") {
+        if (path === import.meta.env.BASE_URL + "foryou") {
             const newData = {
                 posts: await fetchFollowedPosts(),
                 profile: initialData.profile
@@ -87,7 +87,7 @@ export default function Feed() {
                     "
                 >
                     <div className="w-full h-full rounded-full border border-main-black flex items-center justify-center">
-                        <img src="/assets/icons/refresh.svg" alt="refresh" className="w-6 h-6" />
+                        <img src={import.meta.env.BASE_URL + "assets/icons/refresh.svg"} alt="refresh" className="w-6 h-6" />
                     </div>
                 </button>
                 <PostEditor username={data.profile.username} id={data.profile.id} />

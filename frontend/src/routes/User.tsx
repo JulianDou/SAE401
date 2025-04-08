@@ -116,7 +116,7 @@ export default function User() {
                 after:content-[''] after:w-full after:h-[1px] after:bg-main-grey after:-order-1
             ">
                 <div className="w-36 h-36 rounded-full bg-main-slate -order-2">
-                    <img src="/placeholders/defaultpfp.png" alt="Profile Picture" className="w-full h-full object-cover rounded-full" />
+                    <img src={import.meta.env.BASE_URL + "placeholders/defaultpfp.png"} alt="Profile Picture" className="w-full h-full object-cover rounded-full" />
                 </div>
                 <p className="text-2xl font-bold -order-2">{data.username}</p>
                 <p className="text-lg text-main-slate -order-2">{data.email}</p>

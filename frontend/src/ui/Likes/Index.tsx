@@ -62,7 +62,7 @@ export default function Likes(props: likesProps) {
             <img 
                 onClick={handleLike}
                 className="hover:cursor-pointer"
-                src={likedStatus ? "/assets/icons/like_true.svg" : "/assets/icons/like_false.svg"}
+                src={likedStatus ? (import.meta.env.BASE_URL + "assets/icons/like_true.svg") : (import.meta.env.BASE_URL + "assets/icons/like_false.svg")}
                 alt="like" 
             />
             <p>{likesCount}</p>

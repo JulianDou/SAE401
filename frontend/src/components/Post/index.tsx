@@ -97,7 +97,7 @@ export default function Post(props: PostProps) {
                         <img 
                             onClick={() => setDeleting(true)}
                             className="hover:cursor-pointer"
-                            src="/assets/icons/delete.svg" alt="delete" 
+                            src={import.meta.env.BASE_URL + "assets/icons/delete.svg"} alt="delete" 
                         />
                     }
                     <div className={`

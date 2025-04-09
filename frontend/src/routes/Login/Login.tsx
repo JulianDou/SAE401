@@ -5,7 +5,7 @@ import { api_url } from "../../data/loaders";
 
 export default function Login() {
     const location = useLocation();
-    const isAdmin = location.pathname.startsWith("/admin");
+    const isAdmin = location.pathname.startsWith(`${import.meta.env.BASE_URL}admin`);
     const [error, setError] = useState<string | null>(null);
     const [isFormValid, setIsFormValid] = useState(false); // État pour la validité du formulaire
     const navigate = useNavigate();
@@ -51,7 +51,7 @@ export default function Login() {
         })
         .then(() => {
             setError(null);
-            navigate("/");
+            navigate(import.meta.env.BASE_URL);
         })
         .catch((error) => {
             setError(error.message);
@@ -67,7 +67,7 @@ export default function Login() {
     return (
         <>
             <div className="flex flex-col items-center justify-center w-full h-full gap-10">
-                <img src="/assets/Logo.png" alt="Logo"></img>
+                <img src={import.meta.env.BASE_URL + "assets/Logo.png"} alt="Logo"></img>
                 <p className={error ? "text-main-red" : "hidden"}>{error}</p>
                 <form 
                     method="post" 

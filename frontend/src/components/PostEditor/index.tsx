@@ -71,22 +71,22 @@ export default function PostEditor(props: PostEditorProps) {
         const token = localStorage.getItem("auth_token");
 
         const text = getInput();
-        const formData = new FormData();
         // const data = {
         //     text: text,
         // }
-        if (text) {
-            formData.append("text", text);
-        }
-        else {
+
+        const formData = new FormData();        
+        if (!text) {
+            setPopupOpen(true);
+            setMessage("Please enter a text...");
             return;
         }
+        formData.append("text", text);
 
         fetch (api_url + "posts", {
             method: "POST",
             credentials: "include",
             headers: {
-                "Content-Type": "application/json",
                 "Authorization": `${token}`
             },
             // body: JSON.stringify(data),

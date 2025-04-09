@@ -75,13 +75,13 @@ export default function PostEditor(props: PostEditorProps) {
         //     text: text,
         // }
 
-        const formData = new FormData();        
+        const formData = new FormData();
         if (!text) {
             setPopupOpen(true);
             setMessage("Please enter a text...");
             return;
         }
-        formData.append("text", text);
+        formData.append('text', text);
 
         fetch (api_url + "posts", {
             method: "POST",
@@ -89,7 +89,6 @@ export default function PostEditor(props: PostEditorProps) {
             headers: {
                 "Authorization": `${token}`
             },
-            // body: JSON.stringify(data),
             body: formData,
         })
         .then((response) => {

@@ -110,6 +110,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['post:read', 'reply:read'])]
     private ?string $avatar = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['post:read', 'reply:read'])]
+    private ?bool $isReadOnly = null;
+
     public function __construct()
     {
         $this->posts = new ArrayCollection();
@@ -481,6 +485,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setAvatar(?string $avatar): static
     {
         $this->avatar = $avatar;
+
+        return $this;
+    }
+
+    public function isReadOnly(): ?bool
+    {
+        return $this->isReadOnly;
+    }
+
+    public function setIsReadOnly(?bool $isReadOnly): static
+    {
+        $this->isReadOnly = $isReadOnly;
 
         return $this;
     }

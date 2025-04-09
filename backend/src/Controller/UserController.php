@@ -505,6 +505,7 @@ class UserController extends AbstractController
                 'belongsToUser' => $user->getId() === $targetUser->getId(),
                 'blockedUsers' => $blockedUsers_safe,
                 'avatar' => $targetUser->getAvatar(),
+                'readonly' => $targetUser->isReadOnly()
             ];
         }
         else {
@@ -517,6 +518,37 @@ class UserController extends AbstractController
         
         $response = $serializer->serialize($user_safe, 'json', ['groups' => ['user:read']]);
         return new JsonResponse($response, 200, [], true);
+    }
+
+    #[Route('/api/user/readonly', methods: ['PATCH'], format: 'json')]
+    public function switchReadOnly(
+        Request $request,
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager,
+    ): JsonResponse
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Invalid token'], 401);
+        }
+
+        if ($user->isReadOnly()) {
+            $user->setIsReadOnly(false);
+            $message = 'Read-only mode successfully disabled.';
+        } else {
+            $user->setIsReadOnly(true);
+            $message = 'Read-only mode successfully enabled.';
+        }
+
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return new JsonResponse(['message' => $message, 'state' => $user->isReadOnly()], 200);
     }
 
 }

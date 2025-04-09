@@ -13,6 +13,7 @@ export default function UserEdit() {
     const [username, setUsername] = useState(data.username);
     const [email, setEmail] = useState(data.email);
     const [avatar, setAvatar] = useState(data.avatar);
+    const [readOnly, setReadOnly] = useState(data.readonly);
     const [error, setError] = useState('');
     const [messageColor, setMessageColor] = useState('');
     const [modifications, setModifications] = useState<Modification[]>([]);
@@ -147,6 +148,43 @@ export default function UserEdit() {
         });
     }
 
+    const handleReadOnly = () => {
+        const token = localStorage.getItem("auth_token");
+
+        fetch (api_url + "user/readonly", {
+            method: "PATCH",
+            credentials: "include",
+            headers: {
+                "Authorization": `${token}`
+            },
+        })
+        .then((response) => {
+            const res = response.json();
+            if (!response.ok) {
+                return res.then((err) => {
+                    throw new Error(err.message || "An error occurred...");
+                });
+            }
+            res.then((data) => {
+                if (data.message === undefined) {
+                    setMessageColor('red');
+                    setError("An unexpected error occurred...");
+                    return;
+                }
+                else {
+                    setMessageColor('black');
+                    setError(data.message);
+                    setReadOnly(data.state);
+                    return;
+                }
+            })
+        })
+        .catch((error) => {
+            setMessageColor('red');
+            setError(error.message);
+        });
+    }
+
     if (!data.belongsToUser){
         return (
             <div className="w-full h-full flex flex-col gap-2.5 items-center justify-center">
@@ -207,12 +245,22 @@ export default function UserEdit() {
                     style={{ width: `${email.length + 1}ch` }}
                     value={email}
                 />
+                <button
+                    onClick={handleReadOnly}
+                    className={`
+                        flex items-center justify-center rounded-md px-5 py-2.5 hover:cursor-pointer
+                        mt-2.5 -order-2
+                        ${readOnly ? 'bg-main-charcoal text-white' : 'border-2 border-main-charcoal text-main-charcoal'}
+                    `}
+                >
+                    Read-only {readOnly ? 'enabled' : 'disabled'}
+                </button>
                 <div className={`flex items-center gap-2.5 -order-2`}>
                     <button 
                         onClick={handleSave}
                         className={`
                             flex items-center justify-center rounded-md px-5 py-2.5 hover:cursor-pointer
-                            bg-main-black text-white
+                            bg-main-black text-white mt-2.5
                         `}
                     >
                         Save changes
@@ -220,6 +268,7 @@ export default function UserEdit() {
                 </div>
                 <p
                     className={`
+                        mt-2.5
                         ${error.length > 0 ? 'visible' : 'invisible'}
                         ${ messageColor === 'red' ? 'text-red-500' : 'text-black' }
                     `}

@@ -61,6 +61,11 @@ class ReplyController extends AbstractController
             return new JsonResponse(['message' => 'You are blocked by the author of this post. You cannot reply to it.'], 403);
         }
 
+        // Check if post author is set to read-only
+        if ($parentPost->getAuthor()->isReadOnly()) {
+            return new JsonResponse(['message' => 'This post author is set to read-only. You cannot reply to it.'], 403);
+        }
+
         $text = $request->request->get('text');
         $file = $request->files->get('media');
 

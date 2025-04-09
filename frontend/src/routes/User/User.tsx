@@ -30,7 +30,8 @@ export async function loader({params}: {params: Params<string>}) {
         blockedUser: userData.blockedUser,
         isBlocked: userData.isBlocked,
         blockedUsers: userData.blockedUsers,
-        avatar: userData.avatar ? server_url + userData.avatar : '/placeholders/defaultpfp.png'
+        avatar: userData.avatar ? server_url + userData.avatar : '/placeholders/defaultpfp.png',
+        readonly: userData.readonly,
     }
     return data;
 }
@@ -280,7 +281,8 @@ export default function User() {
                                     time={post.time}
                                     author={{
                                         id: post.author.id,
-                                        username: post.author.username
+                                        username: post.author.username,
+                                        readonly: post.author.is_read_only,
                                     }}
                                     image={post.image}
                                     likes={post.likes}

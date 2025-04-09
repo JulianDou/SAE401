@@ -75,6 +75,7 @@ export default function Feed() {
                                 author={{
                                     id: post.author.id,
                                     username: post.author.username,
+                                    readonly: post.author.is_read_only,
                                     avatar: post.author.avatar ? server_url + post.author.avatar : "/placeholders/defaultpfp.png"
                                 }}
                                 image={post.image}

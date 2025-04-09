@@ -15,6 +15,7 @@ interface PostProps {
         id: number;
         username: string;
         avatar?: string;
+        readonly?: boolean;
     }
     image?: string;
     likes: [
@@ -278,7 +279,7 @@ export default function Post(props: PostProps) {
                         }
 
                         { // Icone reponse
-                            !props.userBlockedByAuthor && !props.isReply &&
+                            !props.userBlockedByAuthor && !props.isReply && !props.author.readonly &&
                             <img
                                 className="hover:cursor-pointer"
                                 onClick={() => setReplying(!replying)}

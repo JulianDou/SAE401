@@ -23,3 +23,9 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Doctrine\TableNameGenerator: # Pour ajouter cyclec_ au nom des tables
+        arguments:
+            $prefix: 'cyclec_'
+        tags:
+            - { name: doctrine.naming_strategy }

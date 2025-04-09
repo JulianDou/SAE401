@@ -18,31 +18,31 @@ import UserEdit from './routes/User/UserEdit';
 
 const router = createBrowserRouter([
     {
-        path: import.meta.env.BASE_URL, // Use the base URL for the root path
+        path: import.meta.env.BASE_URL,
         element: <Layout />,
         children: [
             {
-                path: import.meta.env.BASE_URL, // Feed route
+                path: import.meta.env.BASE_URL,
                 element: <Feed />,
                 loader: feedLoader,
             },
             {
-                path: `${import.meta.env.BASE_URL}user/:username`, // User profile route
+                path: `${import.meta.env.BASE_URL}user/:username`,
                 element: <User />,
                 loader: userLoader,
             },
             {
-                path: `${import.meta.env.BASE_URL}user/:username/edit`, // User edit route
+                path: `${import.meta.env.BASE_URL}user/:username/edit`,
                 element: <UserEdit />,
                 loader: userLoader,
             },
             {
-                path: `${import.meta.env.BASE_URL}foryou`, // For You feed route
+                path: `${import.meta.env.BASE_URL}foryou`,
                 element: <Feed />,
                 loader: feedLoaderFollowed,
             },
             {
-                path: `${import.meta.env.BASE_URL}login`, // Login route
+                path: `${import.meta.env.BASE_URL}login`,
                 element: <LoginMain />,
                 children: [
                     {
@@ -56,11 +56,11 @@ const router = createBrowserRouter([
                 ]
             },
             {
-                path: '*', // Catch-all route for errors
+                path: '*',
                 element: <Error />,
             },
             {
-                path: `${import.meta.env.BASE_URL}admin`, // Admin dashboard route
+                path: `${import.meta.env.BASE_URL}admin`,
                 element: <Admin />,
                 loader: adminLoader,
                 children: [

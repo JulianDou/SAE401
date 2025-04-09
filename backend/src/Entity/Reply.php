@@ -35,7 +35,7 @@ class Reply
      * @var Collection<int, User>
      */
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'likedReplies')]
-    #[ORM\JoinTable(name: 'reply_likes')]
+    #[ORM\JoinTable(name: 'cyclec_reply_likes')]
     #[ORM\JoinColumn(name: 'reply_id', referencedColumnName: 'id')]
     #[ORM\InverseJoinColumn(name: 'user_id', referencedColumnName: 'id')]
     #[Groups(['reply:read'])]

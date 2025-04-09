@@ -62,7 +62,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, self>
      */
     #[ORM\ManyToMany(targetEntity: self::class, inversedBy: 'followers')]
-    #[ORM\JoinTable(name: 'user_follows')]
+    #[ORM\JoinTable(name: 'cyclec_user_follows')]
     #[ORM\JoinColumn(name: 'follower_id', referencedColumnName: 'id')]
     #[ORM\InverseJoinColumn(name: 'followedUser_id', referencedColumnName: 'id')]
     private Collection $follows;
@@ -83,7 +83,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, self>
      */
     #[ORM\ManyToMany(targetEntity: self::class, inversedBy: 'blockedBy')]
-    #[ORM\JoinTable(name: 'user_blocks')]
+    #[ORM\JoinTable(name: 'cyclec_user_blocks')]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id')]
     #[ORM\InverseJoinColumn(name: 'blockedUser_id', referencedColumnName: 'id')]
     private Collection $blockedUsers;

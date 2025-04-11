@@ -1,5 +1,4 @@
 import ProfilePic from "../../ui/ProfilePic";
-import Image from "../../ui/Image";
 import Username from "../../ui/Username";
 
 interface PostProps {
@@ -33,9 +32,6 @@ export default function Post(props: PostProps) {
                     <p className="text-main-slate">{formattedTime}</p>
                 </div>
                 <p className="text-main-slate">{props.text}</p>
-                {props.image && 
-                    <Image src={props.image} alt={props.author.username + "'s post's image"} maxHeight={500}/>
-                }
             </div>
         </div>
     )

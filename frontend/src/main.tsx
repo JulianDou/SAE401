@@ -15,24 +15,20 @@ import Users, {loader as adminUsersLoader} from './routes/Admin/Users';
 
 const router = createBrowserRouter([
     {
-        path: '/',
+        path: import.meta.env.BASE_URL,
         element: <Layout />,
         children: [
             {
-                path: '/',
+                path: import.meta.env.BASE_URL,
                 element: <Feed />,
                 loader: feedLoader,
             },
             {
-                path: 'profile',
+                path: `${import.meta.env.BASE_URL}user`,
                 element: <h1>Profile</h1>,
             },
             {
-                path: 'notifications',
-                element: <h1>Notifications</h1>,
-            },
-            {
-                path: 'login',
+                path: `${import.meta.env.BASE_URL}login`,
                 element: <LoginMain />,
                 children: [
                     {
@@ -50,7 +46,7 @@ const router = createBrowserRouter([
                 element: <Error />,
             },
             {
-                path: 'admin',
+                path: `${import.meta.env.BASE_URL}admin`,
                 element: <Admin />,
                 loader: adminLoader,
                 children: [

@@ -43,6 +43,27 @@ class PostRepository extends ServiceEntityRepository
         return new Paginator($query);
     }
 
+    public function searchPosts($value, $mode){
+        if ($mode == 'text'){
+            $query = $this->createQueryBuilder('p')
+                ->andWhere('p.text LIKE :val')
+                ->setParameter('val', '%'.$value.'%')
+                ->orderBy('p.time', 'DESC')
+                ->getQuery()
+            ;
+        }
+        else if ($mode == 'author'){
+            $query = $this->createQueryBuilder('p')
+                ->innerJoin('p.author', 'u')
+                ->andWhere('u.username LIKE :val')
+                ->setParameter('val', '%'.$value.'%')
+                ->orderBy('p.time', 'DESC')
+                ->getQuery();
+        }
+
+        return new Paginator($query);
+    }
+
 //    /**
 //     * @return Post[] Returns an array of Post objects
 //     */

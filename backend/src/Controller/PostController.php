@@ -119,7 +119,7 @@ class PostController extends AbstractController
         $post->setIsCensored(false);
 
         if ($file instanceof UploadedFile) {
-            $uploadsDir = $this->getParameter('uploads_directory'); // Configurez ce paramètre dans services.yaml
+            $uploadsDir = $this->getParameter('uploads_directory');
             $filename = uniqid() . '.' . $file->guessExtension();
 
             try {
@@ -176,14 +176,6 @@ class PostController extends AbstractController
         ]);
 
         return JsonResponse::fromJsonString($serializedPosts);
-    }
-
-    #[Route('/api/posts/{id}', methods: ['GET'], format: 'json')]
-    public function get(PostRepository $postRepository, int $id, SerializerInterface $serializer): JsonResponse
-    {
-        $post = $postRepository->find($id);
-        $res = $serializer->serialize($post, 'json');
-        return JsonResponse::fromJsonString($res);
     }
 
     #[Route('/api/posts/{id}', methods: ['PATCH'], format: 'json')]
@@ -361,5 +353,39 @@ class PostController extends AbstractController
         return JsonResponse::fromJsonString($serializedReplies);
     }
 
+    #[Route('/api/posts/search', methods: ['GET'], format: 'json')]
+    public function searchPosts(
+        PostRepository $postRepository,
+        UserRepository $userRepository,
+        Request $request,
+        SerializerInterface $serializer
+    ): JsonResponse
+    {
+        $token = $request->headers->get('Authorization');
+        if (!$token) {
+            return new JsonResponse(['message' => 'Authorization token missing. Try logging in ?'], 401);
+        }
+
+        $user = $userRepository->findOneBy(['token' => $token]);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Authorization token invalid. Try logging in ?'], 401);
+        }
+
+        $searchTerm = $request->query->get('query', '');
+        $mode = 'text';
+        if (str_starts_with($searchTerm, 'from:')) {
+            $mode = 'author';
+            $searchTerm = ltrim($searchTerm, 'from:');
+        }
+
+        $posts = $postRepository->searchPosts($searchTerm, $mode);
+
+        // Serialize posts
+        $serializedPosts = $serializer->serialize($posts, 'json', [
+            AbstractNormalizer::GROUPS => ['post:read'],
+        ]);
+
+        return new JsonResponse(['data' => $serializedPosts, 'message' => 'Search results for '.$mode.' : '.$searchTerm.''], 200);
+    }
 }
 

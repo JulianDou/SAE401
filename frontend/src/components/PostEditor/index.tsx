@@ -7,6 +7,7 @@ import Username from '../../ui/Username';
 interface PostEditorProps {
     id: number;
     username: string;
+    avatar?: string;
     mode?: string;
     postId?: number;
 }
@@ -192,7 +193,7 @@ export default function PostEditor(props: PostEditorProps) {
                 }`
             }>
                 <div className="flex gap-3 w-full">
-                    <ProfilePic username={props.username} id={props.id} size={3}/>
+                    <ProfilePic username={props.username} id={props.id} image={props.avatar} size={3}/>
                     <div className="flex flex-col gap-2.5 flex-auto">
                         <div className="flex md:justify-between flex-col md:flex-row">
                             <Username username={props.username} id={props.id} />

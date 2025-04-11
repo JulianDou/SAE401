@@ -179,7 +179,7 @@ export default function UserEdit() {
                         />
                         <label htmlFor="avatar-upload">
                             <img
-                                src="/assets/icons/edit_false.svg"
+                                src={import.meta.env.BASE_URL + "assets/icons/edit_false.svg"}
                                 alt="Edit Avatar"
                                 className="absolute bottom-0.5 right-0.5 p-1 bg-main-white border-2 rounded border-mai-black hover:cursor-pointer"
                             />

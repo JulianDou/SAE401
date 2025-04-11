@@ -1,7 +1,6 @@
 import { fetchPosts } from "../../data/loaders"
 import { useLoaderData } from "react-router-dom"
 import PostAdminEdit from "../../components/Admin/Post"
-import { server_url } from "../../data/loaders"
 
 export async function loader() {
     const users = await fetchPosts()
@@ -25,7 +24,7 @@ export default function Posts() {
                                     {
                                         id: post.author.id,
                                         username: post.author.username,
-                                        avatar: post.author.avatar ? server_url + post.author.avatar : '/placeholders/defaultpfp.png'
+                                        avatar: post.author.avatar ? (import.meta.env.VITE_API_URL + post.author.avatar) : (import.meta.env.BASE_URL + 'placeholders/defaultpfp.png')
                                     }
                                 }
                                 media={post.media}

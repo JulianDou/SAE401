@@ -30,7 +30,7 @@ export default function Logout() {
                     localStorage.removeItem("auth_token");
                     localStorage.removeItem("isAuthenticated");
                     localStorage.removeItem("user_id");
-                    navigate("/login");
+                    navigate(import.meta.env.BASE_URL + "login");
                 }
             })
         })
@@ -41,7 +41,7 @@ export default function Logout() {
 
     return (
         <div onClick={logout} className="h-8 w-8 hover:cursor-pointer">
-            <img className="w-full h-full" src="/assets/icons/exit.svg" alt="logout" />
+            <img className="w-full h-full" src={import.meta.env.BASE_URL + "assets/icons/exit.svg"} alt="logout" />
         </div>
     )
 }

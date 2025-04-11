@@ -18,31 +18,31 @@ import UserEdit from './routes/User/UserEdit';
 
 const router = createBrowserRouter([
     {
-        path: '/',
+        path: import.meta.env.BASE_URL,
         element: <Layout />,
         children: [
             {
-                path: '/',
+                path: import.meta.env.BASE_URL,
                 element: <Feed />,
                 loader: feedLoader,
             },
             {
-                path: 'user/:username',
+                path: `${import.meta.env.BASE_URL}user/:username`,
                 element: <User />,
                 loader: userLoader,
             },
             {
-                path: 'user/:username/edit',
+                path: `${import.meta.env.BASE_URL}user/:username/edit`,
                 element: <UserEdit />,
                 loader: userLoader,
             },
             {
-                path: 'foryou',
+                path: `${import.meta.env.BASE_URL}foryou`,
                 element: <Feed />,
                 loader: feedLoaderFollowed,
             },
             {
-                path: 'login',
+                path: `${import.meta.env.BASE_URL}login`,
                 element: <LoginMain />,
                 children: [
                     {
@@ -60,7 +60,7 @@ const router = createBrowserRouter([
                 element: <Error />,
             },
             {
-                path: 'admin',
+                path: `${import.meta.env.BASE_URL}admin`,
                 element: <Admin />,
                 loader: adminLoader,
                 children: [

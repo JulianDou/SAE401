@@ -33,11 +33,11 @@ export default function Signup() {
                     throw new Error(err.message || "An error occurred...");
                 });
             }
-            navigate("/login");
+            navigate(import.meta.env.BASE_URL + "login");
         })
         .then(() => {
             setError(null);
-            navigate("/");
+            navigate(import.meta.env.BASE_URL + "login");
         })
         .catch((error) => {
             setError(error.message);
@@ -53,7 +53,7 @@ export default function Signup() {
     return (
         <>
             <div className="flex flex-col items-center justify-center w-full h-full gap-10">
-                <img src="/assets/Logo.png" alt="Logo"></img>
+                <img src={import.meta.env.BASE_URL + "assets/Logo.png"} alt="Logo"></img>
                 <p className={error ? "text-main-red" : "hidden"}>{error}</p>
                 <form
                     className="flex flex-col gap-2.5 px-8 w-full max-w-96"

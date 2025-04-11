@@ -2,7 +2,6 @@ import ProfilePic from "../../../ui/ProfilePic";
 import Username from "../../../ui/Username";
 import Image from "../../../ui/Image";
 import { api_url } from '../../../data/loaders';
-import { server_url } from "../../../data/loaders";
 import { useState } from "react";
 
 interface PostProps {
@@ -178,7 +177,7 @@ export default function PostAdminEdit(props: PostProps) {
                                     {
                                         id: reply.author.id,
                                         username: reply.author.username,
-                                        avatar: reply.author.avatar ? server_url + reply.author.avatar : '/placeholders/defaultpfp.png'
+                                        avatar: reply.author.avatar ? (import.meta.env.VITE_API_URL + reply.author.avatar) : (import.meta.env.BASE_URL + 'placeholders/defaultpfp.png')
                                     }
                                 }
                                 media={reply.media}

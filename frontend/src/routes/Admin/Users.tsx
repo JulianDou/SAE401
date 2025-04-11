@@ -20,6 +20,7 @@ export default function Users() {
                                 id={user.id}
                                 username={user.username}
                                 email={user.email}
+                                avatar={user.avatar}
                                 verified={user.verified}
                                 admin={user.admin}
                                 banned={user.banned}

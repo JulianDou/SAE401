@@ -1,7 +1,6 @@
 import { fetchPosts, getUserData, fetchFollowedPosts } from "../data/loaders"
 import { useLoaderData, useLocation } from "react-router-dom"
 import { useState } from "react"
-import { server_url } from "../data/loaders"
 
 import Post from "../components/Post"
 import PostEditor from "../components/PostEditor"
@@ -40,7 +39,7 @@ export default function Feed() {
 
     async function refresh() {
         const path = location.pathname;
-        if (path === "/foryou") {
+        if (path === import.meta.env.BASE_URL + "foryou") {
             const newData = {
                 posts: await fetchFollowedPosts(),
                 profile: initialData.profile
@@ -75,7 +74,7 @@ export default function Feed() {
                                 author={{
                                     id: post.author.id,
                                     username: post.author.username,
-                                    avatar: post.author.avatar ? server_url + post.author.avatar : "/placeholders/defaultpfp.png"
+                                    avatar: post.author.avatar ? import.meta.env.VITE_API_URL + post.author.avatar : import.meta.env.BASE_URL + "placeholders/defaultpfp.png"
                                 }}
                                 image={post.image}
                                 likes={post.likes}
@@ -98,10 +97,10 @@ export default function Feed() {
                     "
                 >
                     <div className="w-full h-full rounded-full border border-main-black flex items-center justify-center">
-                        <img src="/assets/icons/refresh.svg" alt="refresh" className="w-6 h-6" />
+                        <img src={import.meta.env.BASE_URL + "assets/icons/refresh.svg"} alt="refresh" className="w-6 h-6" />
                     </div>
                 </button>
-                <PostEditor username={data.profile.username} id={data.profile.id} />
+                <PostEditor username={data.profile.username} id={data.profile.id} avatar={import.meta.env.VITE_API_URL + data.profile.avatar} />
             </div>
         </>
     )
